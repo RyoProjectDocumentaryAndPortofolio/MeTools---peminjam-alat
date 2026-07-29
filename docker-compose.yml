@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # 1. SERVER BACKEND (LARAVEL)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    container_name: PROJECT_API_UJIKOM
+    restart: always
+    working_dir: /var/www/html
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+    user: ${UID:-1000}:${GID:-1000}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - API-UJIKOM
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=API_UJIKOM
+      - DB_USERNAME=APIUJIKOM
+      - DB_PASSWORD=APIUJIKOM
+
+  # 2. SERVER DATABASE MYSQL
+  db:
+    image: mysql:8.0
+    container_name: API_UJIKOM
+    restart: always
+    environment:
+      MYSQL_DATABASE: API_UJIKOM
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: APIUJIKOM
+      MYSQL_PASSWORD: APIUJIKOM
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - API-UJIKOM
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+
+  # 3. SERVER PHPMYADMIN
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: API_UJIKOM_DB
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+      PMA_USER: root
+      PMA_PASSWORD: root
+      UPLOAD_LIMIT: 300M
+    depends_on:
+      - db
+    networks:
+      - API-UJIKOM
+
+volumes:
+  db_data:
+    name: db_data
+
+networks:
+  API-UJIKOM:
+    driver: bridge
+    name: API-UJIKOM
