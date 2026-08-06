@@ -1,0 +1,270 @@
+/* ============================================
+   PETUGAS - STEAMPUNK STYLE
+   ============================================ */
+
+/* ALERT */
+.alert-success {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    background: rgba(0, 200, 83, 0.1);
+    border-left: 4px solid #00c853;
+    border-radius: 6px;
+    color: #a5d6a7;
+}
+
+.alert-success .material-symbols-outlined {
+    color: #00c853;
+    font-size: 24px;
+}
+
+.alert-error {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    background: rgba(255, 23, 68, 0.1);
+    border-left: 4px solid #ff1744;
+    border-radius: 6px;
+    color: #ff8a80;
+}
+
+.alert-error .material-symbols-outlined {
+    color: #ff1744;
+    font-size: 24px;
+}
+
+/* PEMINJAMAN CARD */
+.peminjaman-card {
+    background: rgba(23, 19, 5, 0.7);
+    border: 1px solid #4a4737;
+    border-radius: 8px;
+    overflow: hidden;
+    backdrop-filter: blur(4px);
+}
+
+.peminjaman-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #4a4737;
+}
+
+.peminjaman-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #ebe2c8;
+    margin: 0 0 4px 0;
+}
+
+.peminjaman-header h3 .material-symbols-outlined {
+    color: #d8c860;
+    font-size: 26px;
+}
+
+.peminjaman-subtitle {
+    font-size: 14px;
+    color: #96917e;
+    margin: 0;
+}
+
+/* TABLE */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.peminjaman-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.peminjaman-table thead {
+    background: rgba(17, 14, 2, 0.6);
+}
+
+.peminjaman-table thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #96917e;
+    border-bottom: 1px solid #4a4737;
+}
+
+.peminjaman-table tbody tr {
+    border-bottom: 1px solid rgba(74, 71, 55, 0.3);
+    transition: background 0.2s ease;
+}
+
+.peminjaman-table tbody tr:hover {
+    background: rgba(216, 200, 96, 0.05);
+}
+
+.peminjaman-table tbody td {
+    padding: 12px 16px;
+    color: #ccc6b2;
+    vertical-align: middle;
+}
+
+.peminjaman-table .peminjam-name {
+    font-weight: 500;
+    color: #ebe2c8;
+}
+
+/* STATUS BADGE */
+.status-badge {
+    display: inline-block;
+    padding: 3px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.diajukan {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-badge.dipinjam {
+    background: rgba(79, 172, 254, 0.2);
+    color: #4facfe;
+    border: 1px solid rgba(79, 172, 254, 0.3);
+}
+
+.status-badge.dikembalikan {
+    background: rgba(0, 200, 83, 0.15);
+    color: #a5d6a7;
+    border: 1px solid rgba(0, 200, 83, 0.3);
+}
+
+.status-badge.telat {
+    background: rgba(255, 23, 68, 0.2);
+    color: #ff1744;
+    border: 1px solid rgba(255, 23, 68, 0.3);
+}
+
+/* ALAT LIST */
+.alat-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #ccc6b2;
+    font-size: 13px;
+}
+
+.alat-list li {
+    margin-bottom: 2px;
+}
+
+/* ACTION BUTTONS */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-approve {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(0, 200, 83, 0.15);
+    color: #a5d6a7;
+    border: 1px solid rgba(0, 200, 83, 0.3);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Hanken Grotesk', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-approve .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.btn-approve:hover {
+    background: #00c853;
+    color: #171305;
+    transform: scale(1.05);
+}
+
+.btn-return {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Hanken Grotesk', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-return .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.btn-return:hover {
+    background: #ffc107;
+    color: #171305;
+    transform: scale(1.05);
+}
+
+.text-muted {
+    color: #4a4737;
+    font-size: 13px;
+    font-style: italic;
+}
+
+/* EMPTY */
+.empty-cell {
+    text-align: center;
+    padding: 40px 20px;
+    color: #4a4737;
+    font-style: italic;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .peminjaman-header {
+        padding: 16px;
+    }
+    .peminjaman-table thead th,
+    .peminjaman-table tbody td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+    .btn-approve,
+    .btn-return {
+        padding: 4px 10px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .peminjaman-table thead th:nth-child(1),
+    .peminjaman-table tbody td:nth-child(1) {
+        min-width: 80px;
+    }
+    .peminjaman-table thead th:nth-child(2),
+    .peminjaman-table tbody td:nth-child(2) {
+        min-width: 100px;
+    }
+}

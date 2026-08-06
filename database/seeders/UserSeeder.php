@@ -11,17 +11,41 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            [
+           [
                 'name' => 'Bagus Karim',
-                'email' => 'admin@gmail.com',
+                'email' => 'bagus@gmail.com',
                 'password' => Hash::make('password123'),
-                'role' => 'admin',
+                'role'  => 'admin',
                 'no_hp' => '081234567890',
                 'alamat' => 'Bandung, West Java',
             ],
             [
-                'name' => 'Arif Muhammad',
+                'name' => 'admin',
+                'email' => 'admin@gmail.com',
+                'password' => Hash::make('admin'),
+                'role'  => 'admin',
+                'no_hp' => '081234567890',
+                'alamat' => 'Bandung, West Java',
+            ],
+            [
+                'name' => 'petugas',
                 'email' => 'petugas@gmail.com',
+                'password' => Hash::make('petugas'),
+                'role'  => 'petugas',
+                'no_hp' => '081234567890',
+                'alamat' => 'Bandung, West Java',
+            ],
+             [
+                'name' => 'peminjam',
+                'email' => 'peminjam@gmail.com',
+                'password' => Hash::make('peminjam'),
+                'role' => 'peminjam',
+                'no_hp' => '084567890123',
+                'alamat' => 'Dayeuhkolot, Bandung',
+            ],
+            [
+                'name' => 'Arif Muhammad',
+                'email' => 'arif@gmail.com',
                 'password' => Hash::make('password123'),
                 'role' => 'petugas',
                 'no_hp' => '082345678901',

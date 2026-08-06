@@ -2,24 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use illuminate\Database\Eloquent\Relations\Hasmany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     * 
-     */
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'users';
 
@@ -30,24 +21,14 @@ class User extends Authenticatable
         'role',
         'no_hp',
         'alamat',
-        'foto profile'
+        'foto_profile'  // ← Perbaiki: tanpa spasi
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -55,7 +36,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function peminjaman() : HasMany {
+
+    public function peminjaman(): HasMany
+    {
         return $this->hasMany(Peminjaman::class);
+    }
+
+    public function logAktivitas(): HasMany
+    {
+        return $this->hasMany(LogAktivitas::class);
     }
 }

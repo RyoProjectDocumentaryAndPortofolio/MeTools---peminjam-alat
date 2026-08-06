@@ -1,0 +1,575 @@
+/* ============================================
+   KELOLA USER - STEAMPUNK STYLE
+   ============================================ */
+
+/* ALERT */
+.alert-success {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    background: rgba(0, 200, 83, 0.1);
+    border-left: 4px solid #00c853;
+    border-radius: 6px;
+    color: #a5d6a7;
+}
+
+.alert-success .material-symbols-outlined {
+    color: #00c853;
+    font-size: 24px;
+}
+
+.alert-error {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    background: rgba(255, 23, 68, 0.1);
+    border-left: 4px solid #ff1744;
+    border-radius: 6px;
+    color: #ff8a80;
+}
+
+.alert-error .material-symbols-outlined {
+    color: #ff1744;
+    font-size: 24px;
+}
+
+/* USER CARD */
+.user-card {
+    background: rgba(23, 19, 5, 0.7);
+    border: 1px solid #4a4737;
+    border-radius: 8px;
+    overflow: hidden;
+    backdrop-filter: blur(4px);
+}
+
+.user-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #4a4737;
+}
+
+.user-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #ebe2c8;
+    margin: 0;
+}
+
+.user-header h3 .material-symbols-outlined {
+    color: #d8c860;
+    font-size: 26px;
+}
+
+/* ============================================
+   SEARCH & ACTIONS
+   ============================================ */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+}
+
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    background: rgba(23, 19, 5, 0.6);
+    border: 1px solid #4a4737;
+    border-radius: 6px;
+    padding: 2px 4px;
+    transition: border-color 0.3s ease;
+}
+
+.search-wrapper:focus-within {
+    border-color: #d8c860;
+    box-shadow: 0 0 12px rgba(216, 200, 96, 0.15);
+}
+
+.search-icon {
+    color: #4a4737;
+    font-size: 20px;
+    padding: 0 4px;
+}
+
+.search-input {
+    background: transparent;
+    border: none;
+    color: #ebe2c8;
+    padding: 8px 8px;
+    font-size: 14px;
+    font-family: 'Hanken Grotesk', sans-serif;
+    min-width: 180px;
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #4a4737;
+}
+
+.search-reset {
+    display: flex;
+    align-items: center;
+    color: #4a4737;
+    text-decoration: none;
+    padding: 0 4px;
+    transition: color 0.3s ease;
+}
+
+.search-reset:hover {
+    color: #d8c860;
+}
+
+.search-reset .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.search-btn {
+    padding: 6px 16px;
+    background: linear-gradient(135deg, #f5e479 0%, #d8c860 50%, #b5a642 100%);
+    color: #171305;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Hanken Grotesk', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 4px;
+}
+
+.search-btn:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(216, 200, 96, 0.3);
+}
+
+.btn-add {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #f5e479 0%, #d8c860 50%, #b5a642 100%);
+    color: #171305;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Hanken Grotesk', sans-serif;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-add .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.btn-add:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(216, 200, 96, 0.3);
+}
+
+/* TABLE */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.user-table thead {
+    background: rgba(17, 14, 2, 0.6);
+}
+
+.user-table thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #96917e;
+    border-bottom: 1px solid #4a4737;
+}
+
+.user-table tbody tr {
+    border-bottom: 1px solid rgba(74, 71, 55, 0.3);
+    transition: background 0.2s ease;
+}
+
+.user-table tbody tr:hover {
+    background: rgba(216, 200, 96, 0.05);
+}
+
+.user-table tbody td {
+    padding: 12px 16px;
+    color: #ccc6b2;
+}
+
+.user-table .user-name {
+    font-weight: 500;
+    color: #ebe2c8;
+}
+
+.user-table .text-center {
+    text-align: center;
+}
+
+/* ROLE BADGE */
+.role-badge {
+    display: inline-block;
+    padding: 3px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.role-badge.admin {
+    background: rgba(216, 200, 96, 0.2);
+    color: #d8c860;
+    border: 1px solid rgba(216, 200, 96, 0.3);
+}
+
+.role-badge.petugas {
+    background: rgba(79, 172, 254, 0.2);
+    color: #4facfe;
+    border: 1px solid rgba(79, 172, 254, 0.3);
+}
+
+.role-badge.peminjam {
+    background: rgba(0, 200, 83, 0.15);
+    color: #a5d6a7;
+    border: 1px solid rgba(0, 200, 83, 0.3);
+}
+
+/* ACTION BUTTONS */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 4px;
+    background: rgba(79, 172, 254, 0.15);
+    color: #4facfe;
+    border: 1px solid rgba(79, 172, 254, 0.2);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-edit .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.btn-edit:hover {
+    background: #4facfe;
+    color: #171305;
+    transform: scale(1.1);
+}
+
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 4px;
+    background: rgba(255, 23, 68, 0.15);
+    color: #ff1744;
+    border: 1px solid rgba(255, 23, 68, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.btn-delete:hover {
+    background: #ff1744;
+    color: #171305;
+    transform: scale(1.1);
+}
+
+/* EMPTY */
+.empty-cell {
+    text-align: center;
+    padding: 40px 20px;
+    color: #4a4737;
+    font-style: italic;
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+.pagination-wrapper {
+    padding: 16px 24px;
+    border-top: 1px solid #4a4737;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.pagination-wrapper nav {
+    display: flex;
+    gap: 6px;
+}
+
+.pagination-wrapper .pagination {
+    display: flex;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pagination-wrapper .page-item {
+    display: inline-block;
+}
+
+.pagination-wrapper .page-link {
+    padding: 6px 14px;
+    background: rgba(23, 19, 5, 0.6);
+    border: 1px solid #4a4737;
+    border-radius: 4px;
+    color: #ccc6b2;
+    font-size: 13px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-family: 'Hanken Grotesk', sans-serif;
+}
+
+.pagination-wrapper .page-link:hover {
+    border-color: #d8c860;
+    color: #d8c860;
+    background: rgba(216, 200, 96, 0.05);
+}
+
+.pagination-wrapper .page-item.active .page-link {
+    background: linear-gradient(135deg, #d8c860, #b5a642);
+    color: #171305;
+    border-color: #d8c860;
+}
+
+.pagination-wrapper .page-item.disabled .page-link {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.pagination-wrapper .page-item.disabled .page-link:hover {
+    border-color: #4a4737;
+    color: #ccc6b2;
+    background: transparent;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 992px) {
+    .user-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    .search-form {
+        width: 100%;
+    }
+    .search-wrapper {
+        width: 100%;
+    }
+    .search-input {
+        flex: 1;
+        min-width: auto;
+    }
+    .btn-add {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .user-header {
+        padding: 16px;
+    }
+    .user-table thead th,
+    .user-table tbody td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+    .pagination-wrapper {
+        justify-content: center;
+    }
+    .pagination-wrapper .page-link {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-table thead th:nth-child(2),
+    .user-table tbody td:nth-child(2) {
+        min-width: 100px;
+    }
+    .user-table thead th:nth-child(3),
+    .user-table tbody td:nth-child(3) {
+        min-width: 120px;
+    }
+    .search-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    .search-input {
+        font-size: 13px;
+    }
+}
+/* ============================================
+   SEARCH FORM & BUTTON ADD
+   ============================================ */
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    background: rgba(23, 19, 5, 0.6);
+    border: 1px solid #4a4737;
+    border-radius: 6px;
+    padding: 2px 4px;
+    transition: border-color 0.3s ease;
+    flex: 1;
+}
+
+.search-wrapper:focus-within {
+    border-color: #d8c860;
+    box-shadow: 0 0 12px rgba(216, 200, 96, 0.15);
+}
+
+.search-icon {
+    color: #4a4737;
+    font-size: 20px;
+    padding: 0 4px;
+}
+
+.search-input {
+    background: transparent;
+    border: none;
+    color: #ebe2c8;
+    padding: 8px 8px;
+    font-size: 14px;
+    font-family: 'Hanken Grotesk', sans-serif;
+    min-width: 160px;
+    outline: none;
+    flex: 1;
+}
+
+.search-input::placeholder {
+    color: #4a4737;
+}
+
+.search-btn {
+    padding: 6px 16px;
+    background: linear-gradient(135deg, #f5e479 0%, #d8c860 50%, #b5a642 100%);
+    color: #171305;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Hanken Grotesk', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.search-btn:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(216, 200, 96, 0.3);
+}
+
+.search-reset {
+    display: flex;
+    align-items: center;
+    color: #4a4737;
+    text-decoration: none;
+    padding: 0 4px;
+    transition: color 0.3s ease;
+}
+
+.search-reset:hover {
+    color: #d8c860;
+}
+
+.search-reset .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ============================================
+   TOMBOL TAMBAH USER
+   ============================================ */
+.btn-add {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #f5e479 0%, #d8c860 50%, #b5a642 100%);
+    color: #171305;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Hanken Grotesk', sans-serif;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-add .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.btn-add:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(216, 200, 96, 0.3);
+}
