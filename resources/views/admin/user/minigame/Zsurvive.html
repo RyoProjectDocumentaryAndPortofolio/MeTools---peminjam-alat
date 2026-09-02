@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧟 Steampunk Zombie Survival</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1e1a14;
+            font-family: 'Courier New', monospace;
+            background-image: radial-gradient(circle at 20% 30%, #3d3429, #171305);
+        }
+        .container {
+            background: #1f1b16;
+            padding: 25px 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 0 2px #6a5f3a, 0 20px 60px rgba(0,0,0,0.9);
+            border: 2px solid #b89a5b;
+            text-align: center;
+            max-width: 750px;
+            width: 100%;
+            position: relative;
+        }
+        .container::before {
+            content: "⬡ ⬡ ⬡";
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f1b16;
+            padding: 0 16px;
+            color: #b89a5b;
+            font-size: 14px;
+            letter-spacing: 6px;
+        }
+        h1 {
+            color: #e2c27a;
+            font-size: 22px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-weight: 400;
+            font-family: 'Times New Roman', serif;
+            text-shadow: 0 0 10px #b89a5b55;
+        }
+        h1 span { color: #d4af37; font-weight: bold; }
+        .status {
+            display: flex;
+            justify-content: space-between;
+            color: #b89a5b;
+            font-size: 14px;
+            margin: 10px 0 14px 0;
+            padding: 6px 10px;
+            border: 1px dashed #6a5f3a;
+            border-radius: 8px;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .status span { color: #f0d58c; font-weight: bold; }
+        canvas {
+            border: 3px solid #b89a5b;
+            border-radius: 12px;
+            background: #1a1612;
+            box-shadow: inset 0 0 40px #0f0d0a, 0 0 30px #b89a5b33;
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 1/1;
+        }
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        button {
+            padding: 8px 24px;
+            border: 2px solid #b89a5b;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #2a241e;
+            color: #d4af37;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 0 0 1px #6a5f3a;
+        }
+        button:hover {
+            background: #b89a5b;
+            color: #1f1b16;
+            box-shadow: 0 0 30px #b89a5b88;
+            transform: scale(1.03);
+        }
+        .info {
+            color: #7a6f50;
+            font-size: 12px;
+            margin-top: 10px;
+            border-top: 1px dashed #6a5f3a;
+            padding-top: 10px;
+        }
+        .info kbd {
+            background: #2a241e;
+            border: 1px solid #6a5f3a;
+            padding: 2px 10px;
+            border-radius: 30px;
+            color: #d4af37;
+        }
+        @media (max-width: 500px) {
+            .container { padding: 12px; }
+            h1 { font-size: 18px; letter-spacing: 2px; }
+            .status { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1><span>⚙</span> ZOMBIE <span>SURVIVAL</span> <span>⚙</span></h1>
+    <div class="status">
+        <div>❤️ HP: <span id="hpDisplay">100</span></div>
+        <div>🔫 Ammo: <span id="ammoDisplay">4</span></div>
+        <div>🧟 Wave: <span id="waveDisplay">1</span></div>
+        <div>📅 Day: <span id="dayDisplay">1</span></div>
+        <div>💀 Kills: <span id="killDisplay">0</span></div>
+    </div>
+    <canvas id="gameCanvas" width="600" height="600"></canvas>
+    <div class="controls">
+        <button id="restartBtn">⟳ Restart</button>
+    </div>
+    <div class="info">
+        <kbd>W A S D</kbd> gerak • <kbd>P</kbd> tembak • <kbd>R</kbd> restart
+    </div>
+</div>
+
+<script>
+    (function(){
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = 600, H = 600;
+
+        // ----- Game state -----
+        let player, bullets, zombies, ammoPickups, gameOver, wave, day, kills, frame;
+        let keys = { w:false, a:false, s:false, d:false };
+        let gameLoop;
+        const CELL = 40;
+        const maze = generateMaze(15, 15);
+        let ammoCount = 4;
+
+        // UI
+        const hpDisplay = document.getElementById('hpDisplay');
+        const ammoDisplay = document.getElementById('ammoDisplay');
+        const waveDisplay = document.getElementById('waveDisplay');
+        const dayDisplay = document.getElementById('dayDisplay');
+        const killDisplay = document.getElementById('killDisplay');
+
+        // ----- Generate maze (simple grid) -----
+        function generateMaze(cols, rows) {
+            const grid = [];
+            for (let y = 0; y < rows; y++) {
+                grid[y] = [];
+                for (let x = 0; x < cols; x++) {
+                    grid[y][x] = 1;
+                }
+            }
+            function carve(cx, cy) {
+                grid[cy][cx] = 0;
+                const dirs = [[0,-2],[0,2],[-2,0],[2,0]];
+                for (const d of dirs.sort(() => Math.random() - 0.5)) {
+                    const nx = cx + d[0], ny = cy + d[1];
+                    if (nx > 0 && nx < cols-1 && ny > 0 && ny < rows-1 && grid[ny][nx] === 1) {
+                        grid[cy + d[1]/2][cx + d[0]/2] = 0;
+                        carve(nx, ny);
+                    }
+                }
+            }
+            carve(1, 1);
+            // Pastiin area spawn aman
+            for (let y = 0; y < 4; y++) {
+                for (let x = 0; x < 4; x++) {
+                    if (y < rows && x < cols) grid[y][x] = 0;
+                }
+            }
+            return grid;
+        }
+
+        function isWall(x, y) {
+            const col = Math.floor(x / CELL);
+            const row = Math.floor(y / CELL);
+            if (row < 0 || row >= maze.length || col < 0 || col >= maze[0].length) return true;
+            return maze[row][col] === 1;
+        }
+
+        function isOpen(x, y) {
+            const r = 10;
+            return !isWall(x - r, y - r) && !isWall(x + r, y - r) &&
+                   !isWall(x - r, y + r) && !isWall(x + r, y + r);
+        }
+
+        function randomOpenPos() {
+            let attempts = 0;
+            while (attempts < 300) {
+                const x = Math.floor(Math.random() * (maze[0].length - 2)) * CELL + CELL/2 + CELL;
+                const y = Math.floor(Math.random() * (maze.length - 2)) * CELL + CELL/2 + CELL;
+                if (isOpen(x, y) && x > 20 && y > 20 && x < W-20 && y < H-20) {
+                    return { x, y };
+                }
+                attempts++;
+            }
+            return { x: CELL*2 + CELL/2, y: CELL*2 + CELL/2 };
+        }
+
+        function randomOpenPosFarFromPlayer() {
+            let pos;
+            let attempts = 0;
+            do {
+                pos = randomOpenPos();
+                attempts++;
+                const dx = pos.x - player.x;
+                const dy = pos.y - player.y;
+                if (Math.sqrt(dx*dx + dy*dy) > 150) break;
+            } while (attempts < 50);
+            return pos;
+        }
+
+        // ----- Init -----
+        function init() {
+            const spawn = randomOpenPos();
+            player = {
+                x: spawn.x,
+                y: spawn.y,
+                r: 12,
+                hp: 100,
+                maxHp: 100,
+                speed: 2.5,
+                dir: 0
+            };
+            bullets = [];
+            zombies = [];
+            ammoPickups = [];
+            wave = 1;
+            day = 1;
+            kills = 0;
+            frame = 0;
+            gameOver = false;
+            ammoCount = 4;
+            // Spawn awal 4 peluru di sekitar player
+            for (let i = 0; i < 4; i++) {
+                const pos = randomOpenPosFarFromPlayer();
+                if (pos) ammoPickups.push({ x: pos.x, y: pos.y, r: 8, collected: false });
+            }
+            spawnWave(wave);
+            updateUI();
+            clearInterval(gameLoop);
+            gameLoop = setInterval(update, 1000/60);
+        }
+
+        function spawnWave(waveNum) {
+            const count = 2 + waveNum * 2;
+            for (let i = 0; i < count; i++) {
+                const pos = randomOpenPosFarFromPlayer();
+                if (pos) {
+                    zombies.push({
+                        x: pos.x, y: pos.y,
+                        r: 14,
+                        speed: 0.6 + wave * 0.06,
+                        hp: 1,
+                        damage: 10,
+                        hitCooldown: 0
+                    });
+                }
+            }
+        }
+
+        // ----- Update -----
+        function update() {
+            if (gameOver) return;
+            frame++;
+
+            // ---- Player movement ----
+            let dx = 0, dy = 0;
+            if (keys.w) dy = -player.speed;
+            if (keys.s) dy = player.speed;
+            if (keys.a) dx = -player.speed;
+            if (keys.d) dx = player.speed;
+            if (dx !== 0 && dy !== 0) { dx *= 0.707; dy *= 0.707; }
+
+            let newX = player.x + dx;
+            let newY = player.y + dy;
+            if (isOpen(newX, player.y)) player.x = newX;
+            if (isOpen(player.x, newY)) player.y = newY;
+
+            // ---- Bullets ----
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const b = bullets[i];
+                b.x += b.vx;
+                b.y += b.vy;
+                b.life--;
+                if (b.life <= 0 || isWall(b.x, b.y)) {
+                    bullets.splice(i, 1);
+                    continue;
+                }
+                let hit = false;
+                for (let j = zombies.length - 1; j >= 0; j--) {
+                    const z = zombies[j];
+                    const dzx = b.x - z.x, dzy = b.y - z.y;
+                    if (dzx*dzx + dzy*dzy < (b.r + z.r)*(b.r + z.r)) {
+                        zombies.splice(j, 1);
+                        kills++;
+                        hit = true;
+                        break;
+                    }
+                }
+                if (hit) bullets.splice(i, 1);
+            }
+
+            // ---- Zombies ----
+            for (const z of zombies) {
+                const dzx = player.x - z.x;
+                const dzy = player.y - z.y;
+                const dist = Math.sqrt(dzx*dzx + dzy*dzy);
+                if (dist > 0) {
+                    const move = Math.min(z.speed, dist);
+                    let nzx = z.x + (dzx / dist) * move;
+                    let nzy = z.y + (dzy / dist) * move;
+                    if (isOpen(nzx, nzy)) { z.x = nzx; z.y = nzy; }
+                    else if (isOpen(nzx, z.y)) z.x = nzx;
+                    else if (isOpen(z.x, nzy)) z.y = nzy;
+                }
+                if (z.hitCooldown > 0) z.hitCooldown--;
+                const pdx = player.x - z.x, pdy = player.y - z.y;
+                if (pdx*pdx + pdy*pdy < (player.r + z.r)*(player.r + z.r) && z.hitCooldown === 0) {
+                    player.hp -= z.damage;
+                    z.hitCooldown = 30;
+                    if (player.hp <= 0) {
+                        player.hp = 0;
+                        gameOver = true;
+                        clearInterval(gameLoop);
+                    }
+                }
+            }
+
+            // ---- Ammo pickups ----
+            for (const a of ammoPickups) {
+                if (a.collected) continue;
+                const dxa = player.x - a.x, dya = player.y - a.y;
+                if (dxa*dxa + dya*dya < (player.r + a.r)*(player.r + a.r)) {
+                    a.collected = true;
+                    const gain = 1 + Math.floor(Math.random() * 3);
+                    ammoCount += gain;
+                }
+            }
+            ammoPickups = ammoPickups.filter(a => !a.collected);
+
+            // ---- Spawn ammo periodically ----
+            if (frame % 180 === 0) {
+                const pos = randomOpenPosFarFromPlayer();
+                if (pos) ammoPickups.push({ x: pos.x, y: pos.y, r: 8, collected: false });
+            }
+
+            // ---- Wave system ----
+            if (zombies.length === 0) {
+                wave++;
+                day = Math.floor(wave / 3) + 1;
+                spawnWave(wave);
+                // Bonus ammo tiap wave
+                ammoCount += 2;
+            }
+
+            updateUI();
+        }
+
+        // ----- Draw -----
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#1a1612';
+            ctx.fillRect(0, 0, W, H);
+
+            // Maze
+            for (let row = 0; row < maze.length; row++) {
+                for (let col = 0; col < maze[0].length; col++) {
+                    if (maze[row][col] === 1) {
+                        const x = col * CELL, y = row * CELL;
+                        const grad = ctx.createLinearGradient(x, y, x + CELL, y + CELL);
+                        grad.addColorStop(0, '#3d3429');
+                        grad.addColorStop(0.5, '#5a4f30');
+                        grad.addColorStop(1, '#2a241e');
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(x, y, CELL, CELL);
+                        ctx.fillStyle = '#6a5f3a';
+                        ctx.beginPath();
+                        ctx.arc(x + 6, y + 6, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(x + CELL - 6, y + CELL - 6, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            // Grid lines
+            ctx.strokeStyle = '#2a241e';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= maze[0].length; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * CELL, 0);
+                ctx.lineTo(i * CELL, H);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= maze.length; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, i * CELL);
+                ctx.lineTo(W, i * CELL);
+                ctx.stroke();
+            }
+
+            // Ammo pickups
+            for (const a of ammoPickups) {
+                if (a.collected) continue;
+                ctx.shadowColor = '#d4af37';
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = '#d4af37';
+                ctx.beginPath();
+                ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#b89a5b';
+                ctx.beginPath();
+                ctx.arc(a.x, a.y, a.r * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2 + Date.now() * 0.002;
+                    const gx = a.x + Math.cos(angle) * (a.r + 2);
+                    const gy = a.y + Math.sin(angle) * (a.r + 2);
+                    ctx.fillStyle = '#d4af37';
+                    ctx.beginPath();
+                    ctx.arc(gx, gy, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.shadowBlur = 0;
+            }
+
+            // Zombies
+            for (const z of zombies) {
+                ctx.shadowColor = '#b53b2a';
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = '#2a4a3a';
+                ctx.beginPath();
+                ctx.arc(z.x, z.y, z.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#3d6a4a';
+                ctx.beginPath();
+                ctx.arc(z.x - 4, z.y - 4, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(z.x + 4, z.y - 4, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#b53b2a';
+                ctx.beginPath();
+                ctx.arc(z.x, z.y + 2, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#1a1612';
+                ctx.beginPath();
+                ctx.arc(z.x - 4, z.y - 4, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(z.x + 4, z.y - 4, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            // Bullets
+            for (const b of bullets) {
+                ctx.shadowColor = '#d4af37';
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = '#d4af37';
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#b89a5b';
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.r * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            // Player
+            ctx.shadowColor = '#d4af37';
+            ctx.shadowBlur = 15;
+            const px = player.x, py = player.y;
+            const gradP = ctx.createRadialGradient(px-4, py-4, 2, px, py, player.r);
+            gradP.addColorStop(0, '#d4af37');
+            gradP.addColorStop(0.7, '#b89a5b');
+            gradP.addColorStop(1, '#6a5f3a');
+            ctx.fillStyle = gradP;
+            ctx.beginPath();
+            ctx.arc(px, py, player.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#2a241e';
+            ctx.beginPath();
+            ctx.arc(px - 6, py - 4, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(px + 6, py - 4, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#80deea';
+            ctx.beginPath();
+            ctx.arc(px - 6, py - 4, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(px + 6, py - 4, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#6a5f3a';
+            ctx.beginPath();
+            ctx.arc(px, py + 4, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#d4af37';
+            ctx.beginPath();
+            ctx.arc(px, py + 4, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Game over
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(15,13,10,0.75)';
+                ctx.fillRect(0, 0, W, H);
+                ctx.fillStyle = '#b53b2a';
+                ctx.font = 'bold 44px "Times New Roman", serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = '#b53b2a';
+                ctx.shadowBlur = 30;
+                ctx.fillText('💀 SURVIVED', W/2, H/2 - 30);
+                ctx.shadowBlur = 0;
+                ctx.font = '20px "Courier New", monospace';
+                ctx.fillStyle = '#b89a5b';
+                ctx.fillText(`Day ${day}  •  Wave ${wave}  •  Kills ${kills}`, W/2, H/2 + 45);
+                ctx.fillStyle = '#6a5f3a';
+                ctx.font = '16px "Courier New", monospace';
+                ctx.fillText('Tekan R atau Restart', W/2, H/2 + 90);
+            }
+        }
+
+        // ----- Shoot -----
+        function shoot() {
+            if (gameOver) return;
+            if (ammoCount <= 0) return;
+            ammoCount--;
+            let dx = 0, dy = 0;
+            if (keys.w) dy = -1;
+            if (keys.s) dy = 1;
+            if (keys.a) dx = -1;
+            if (keys.d) dx = 1;
+            if (dx === 0 && dy === 0) { dx = 1; dy = 0; }
+            const len = Math.sqrt(dx*dx + dy*dy);
+            dx /= len; dy /= len;
+            bullets.push({
+                x: player.x + dx * player.r,
+                y: player.y + dy * player.r,
+                vx: dx * 6,
+                vy: dy * 6,
+                r: 5,
+                life: 50
+            });
+            updateUI();
+        }
+
+        function updateUI() {
+            hpDisplay.textContent = player.hp;
+            ammoDisplay.textContent = ammoCount;
+            waveDisplay.textContent = wave;
+            dayDisplay.textContent = day;
+            killDisplay.textContent = kills;
+        }
+
+        function restart() {
+            clearInterval(gameLoop);
+            init();
+        }
+
+        // ----- Controls -----
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'w') keys.w = true;
+            if (key === 'a') keys.a = true;
+            if (key === 's') keys.s = true;
+            if (key === 'd') keys.d = true;
+            if (key === 'p') { e.preventDefault(); shoot(); }
+            if (key === 'r') { restart(); }
+        });
+        document.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'w') keys.w = false;
+            if (key === 'a') keys.a = false;
+            if (key === 's') keys.s = false;
+            if (key === 'd') keys.d = false;
+        });
+
+        document.getElementById('restartBtn').addEventListener('click', restart);
+
+        function render() {
+            draw();
+            requestAnimationFrame(render);
+        }
+
+        init();
+        render();
+
+    })();
+</script>
+
+</body>
+</html>

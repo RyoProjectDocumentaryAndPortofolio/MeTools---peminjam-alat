@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maze Hunt</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#0a0a0e; font-family: 'Segoe UI', Arial, sans-serif; }
+  canvas { display:block; position:fixed; top:0; left:0; }
+
+  .overlay {
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(5,5,8,0.88); z-index:10;
+  }
+  .hidden { display:none !important; }
+
+  .panel {
+    background:#15151c; border:2px solid #3a3a4a; border-radius:12px;
+    padding:36px 44px; text-align:center; max-width:440px; width:90%;
+    box-shadow:0 0 40px rgba(0,0,0,0.6);
+  }
+  .panel h1 { color:#e63946; font-size:32px; letter-spacing:2px; margin-bottom:10px; text-shadow:0 0 12px rgba(230,57,70,0.5); }
+  .panel h2 { color:#f1faee; font-size:22px; margin-bottom:16px; }
+  .panel p { color:#a8a8b3; font-size:14px; line-height:1.6; margin-bottom:14px; }
+  .panel .tag { display:inline-block; background:#22222e; padding:4px 10px; border-radius:6px; margin:2px; font-size:13px; color:#e0e0e6; }
+
+  button {
+    background:#e63946; color:#fff; border:none; padding:12px 28px;
+    font-size:16px; border-radius:8px; cursor:pointer; margin-top:12px;
+    letter-spacing:1px; transition:transform 0.15s, background 0.15s;
+  }
+  button:hover { background:#ff4d5a; transform:translateY(-2px); }
+  button.secondary { background:#3a3a4a; }
+  button.secondary:hover { background:#4a4a5c; }
+
+  input[type=number] {
+    width:80px; padding:10px; font-size:20px; text-align:center;
+    border-radius:8px; border:2px solid #3a3a4a; background:#0f0f14; color:#fff; margin:10px 0;
+  }
+
+  #roleText {
+    font-size:34px; font-weight:bold; letter-spacing:3px; margin:18px 0;
+    color:#ffd166; min-height:44px;
+  }
+  #roleDesc { color:#c8c8d0; font-size:14px; min-height:40px; margin-bottom:6px;}
+
+  #hud {
+    position:fixed; top:14px; left:14px; z-index:5; color:#fff;
+    font-size:14px; background:rgba(10,10,14,0.65); padding:10px 16px;
+    border-radius:10px; border:1px solid #2c2c38; line-height:1.6;
+    pointer-events:none;
+  }
+  #hud .role-ally { color:#6fd08c; font-weight:bold; }
+  #hud .role-killer { color:#ff6b6b; font-weight:bold; }
+  #hud .warn { color:#ffd166; }
+
+  #controlsHint {
+    position:fixed; bottom:14px; left:14px; z-index:5; color:#8a8a96;
+    font-size:12px; background:rgba(10,10,14,0.55); padding:8px 12px; border-radius:8px;
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+<div id="hud" class="hidden"></div>
+<div id="controlsHint" class="hidden">WASD = gerak</div>
+
+<!-- START SCREEN -->
+<div class="overlay" id="screenStart">
+  <div class="panel">
+    <h1>MAZE HUNT</h1>
+    <p>1 Killer vs beberapa Ally di dalam labirin. Ally harus kumpulkan 4 kunci dan isi 1 generator dengan 4 bensin. Killer harus membunuh semua Ally.</p>
+    <p><span class="tag">🔑 4 Kunci</span><span class="tag">⛽ 4 Bensin</span><span class="tag">⚙️ 1 Generator</span></p>
+    <button id="btnStart">MULAI</button>
+  </div>
+</div>
+
+<!-- CONFIG SCREEN -->
+<div class="overlay hidden" id="screenConfig">
+  <div class="panel">
+    <h2>Jumlah Ally</h2>
+    <p>Tentukan berapa banyak Ally di pertandingan ini (termasuk kamu jika kamu jadi Ally). Maksimal 5.</p>
+    <input type="number" id="allyCountInput" min="1" max="5" value="4">
+    <br>
+    <button id="btnConfigNext">LANJUT</button>
+  </div>
+</div>
+
+<!-- ROLE REVEAL SCREEN -->
+<div class="overlay hidden" id="screenReveal">
+  <div class="panel">
+    <h2>Mengundi Peran...</h2>
+    <div id="roleText">?</div>
+    <div id="roleDesc"></div>
+    <button id="btnPlay" class="hidden">MULAI BERMAIN</button>
+  </div>
+</div>
+
+<!-- END SCREEN -->
+<div class="overlay hidden" id="screenEnd">
+  <div class="panel">
+    <h2 id="endTitle">Game Selesai</h2>
+    <p id="endDesc"></p>
+    <button id="btnBackMenu" class="secondary">KEMBALI KE MENU</button>
+  </div>
+</div>
+
+<script>
+(function(){
+
+/* ================== CONFIG ================== */
+const COLS = 21, ROWS = 21, TILE = 24;
+const FW = COLS*2+1, FH = ROWS*2+1;
+const WORLD_W = FW*TILE, WORLD_H = FH*TILE;
+
+const SPEED_PLAYER = 150;
+const SPEED_ALLY_NORMAL = 140;
+const SPEED_ALLY_FLEE = 168;
+const SPEED_KILLER_PATROL = 118;
+const SPEED_KILLER_CHASE = 158;
+
+const KILLER_VISION_TILES = 6.2;
+const FLEE_TRIGGER_TILES = 6.5;
+const FLEE_MEMORY = 4.0;
+const CHASE_MEMORY = 3.0;
+const PICKUP_RADIUS = 16;
+const KILL_RADIUS = 15;
+const PATH_RECOMPUTE_INTERVAL = 0.45;
+
+/* ================== UTIL ================== */
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=randInt(0,i); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+function dist(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); }
+function clamp(v,min,max){ if(min>max) return (min+max)/2; return Math.max(min,Math.min(max,v)); }
+
+/* ================== MAZE GENERATION ================== */
+// grid[y][x] : 0 = floor, 1 = wall  (fine grid, doubled resolution)
+function generateMaze(cols, rows){
+  const fw = cols*2+1, fh = rows*2+1;
+  const grid = [];
+  for(let y=0;y<fh;y++){ grid.push(new Array(fw).fill(1)); }
+  for(let cy=0; cy<rows; cy++){
+    for(let cx=0; cx<cols; cx++){
+      grid[cy*2+1][cx*2+1] = 0;
+    }
+  }
+  const visited = Array.from({length:rows}, ()=> new Array(cols).fill(false));
+  const stack = [{cx:0,cy:0}];
+  visited[0][0] = true;
+  while(stack.length){
+    const cur = stack[stack.length-1];
+    const dirs = shuffle([[1,0],[-1,0],[0,1],[0,-1]]);
+    let moved = false;
+    for(const [dx,dy] of dirs){
+      const ncx = cur.cx+dx, ncy = cur.cy+dy;
+      if(ncx<0||ncx>=cols||ncy<0||ncy>=rows) continue;
+      if(visited[ncy][ncx]) continue;
+      const wx = cur.cx*2+1+dx, wy = cur.cy*2+1+dy;
+      grid[wy][wx] = 0;
+      visited[ncy][ncx] = true;
+      stack.push({cx:ncx,cy:ncy});
+      moved = true;
+      break;
+    }
+    if(!moved) stack.pop();
+  }
+  // Tambah jalan pintas / loop supaya labirin tidak cuma 1 jalur (kejar-kejaran lebih seru)
+  const extraPasses = Math.floor(cols*rows*0.3);
+  for(let i=0;i<extraPasses;i++){
+    const cx = randInt(0,cols-1), cy = randInt(0,rows-1);
+    const [dx,dy] = [[1,0],[-1,0],[0,1],[0,-1]][randInt(0,3)];
+    const ncx = cx+dx, ncy = cy+dy;
+    if(ncx<0||ncx>=cols||ncy<0||ncy>=rows) continue;
+    const wx = cx*2+1+dx, wy = cy*2+1+dy;
+    grid[wy][wx] = 0;
+  }
+  return grid;
+}
+
+function buildCellCenters(){
+  const list = [];
+  for(let cy=0; cy<ROWS; cy++){
+    for(let cx=0; cx<COLS; cx++){
+      list.push(tileCenter(cx*2+1, cy*2+1));
+    }
+  }
+  return list;
+}
+
+function tileOf(entity){ return { tx: Math.floor(entity.x/TILE), ty: Math.floor(entity.y/TILE) }; }
+function tileCenter(tx,ty){ return { x: tx*TILE+TILE/2, y: ty*TILE+TILE/2 }; }
+
+function isWallTile(tx,ty){
+  if(tx<0||ty<0||ty>=maze.length||tx>=maze[0].length) return true;
+  return maze[ty][tx]===1;
+}
+
+/* ================== COLLISION / MOVEMENT ================== */
+function collidesAt(cx,cy,r){
+  const pts = [
+    [cx-r,cy-r],[cx+r,cy-r],[cx-r,cy+r],[cx+r,cy+r],
+    [cx,cy-r],[cx,cy+r],[cx-r,cy],[cx+r,cy]
+  ];
+  for(const [px,py] of pts){
+    const tx = Math.floor(px/TILE), ty = Math.floor(py/TILE);
+    if(isWallTile(tx,ty)) return true;
+  }
+  return false;
+}
+function moveEntity(e, dx, dy){
+  const nx = e.x + dx;
+  if(!collidesAt(nx, e.y, e.r)) e.x = nx;
+  const ny = e.y + dy;
+  if(!collidesAt(e.x, ny, e.r)) e.y = ny;
+}
+
+/* ================== PATHFINDING (BFS) ================== */
+function bfsPath(startTile, endTile){
+  if(isWallTile(endTile.tx,endTile.ty)) return [];
+  if(startTile.tx===endTile.tx && startTile.ty===endTile.ty) return [];
+  const w = maze[0].length, h = maze.length;
+  const visited = new Uint8Array(w*h);
+  const prevX = new Int16Array(w*h).fill(-1);
+  const prevY = new Int16Array(w*h).fill(-1);
+  const idx = (x,y)=> y*w+x;
+  const qx=[startTile.tx], qy=[startTile.ty];
+  visited[idx(startTile.tx,startTile.ty)] = 1;
+  let head=0, found=false;
+  while(head<qx.length){
+    const cx=qx[head], cy=qy[head]; head++;
+    if(cx===endTile.tx && cy===endTile.ty){ found=true; break; }
+    const neigh = [[cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]];
+    for(const [nx,ny] of neigh){
+      if(nx<0||ny<0||nx>=w||ny>=h) continue;
+      const ii = idx(nx,ny);
+      if(visited[ii]) continue;
+      if(maze[ny][nx]===1) continue;
+      visited[ii]=1; prevX[ii]=cx; prevY[ii]=cy;
+      qx.push(nx); qy.push(ny);
+    }
+  }
+  if(!found) return [];
+  const path=[];
+  let cx=endTile.tx, cy=endTile.ty;
+  while(!(cx===startTile.tx && cy===startTile.ty)){
+    path.push(tileCenter(cx,cy));
+    const ii = idx(cx,cy);
+    const pcx = prevX[ii], pcy = prevY[ii];
+    if(pcx===-1) break;
+    cx=pcx; cy=pcy;
+  }
+  path.reverse();
+  return path;
+}
+
+function hasLineOfSight(t0,t1){
+  let x0=t0.tx,y0=t0.ty,x1=t1.tx,y1=t1.ty;
+  const dx=Math.abs(x1-x0), dy=Math.abs(y1-y0);
+  const sx = x0<x1?1:-1, sy = y0<y1?1:-1;
+  let err = dx-dy, x=x0, y=y0;
+  let guard=0;
+  while(guard++ < 400){
+    if(isWallTile(x,y)) return false;
+    if(x===x1 && y===y1) break;
+    const e2 = 2*err;
+    if(e2 > -dy){ err -= dy; x += sx; }
+    if(e2 < dx){ err += dx; y += sy; }
+  }
+  return true;
+}
+
+/* ================== SPAWN HELPERS ================== */
+function pickSpawnPoints(count, avoid, minDist){
+  const candidates = shuffle([...cellCenters]);
+  const chosen = [];
+  const against = [...avoid];
+  let relax = minDist;
+  let tries = 0;
+  while(chosen.length < count && tries < 6){
+    for(const c of candidates){
+      if(chosen.length >= count) break;
+      let ok = true;
+      for(const p of against){ if(dist(c,p) < relax){ ok=false; break; } }
+      if(ok){ chosen.push(c); against.push(c); }
+    }
+    relax *= 0.6;
+    tries++;
+  }
+  while(chosen.length < count){
+    chosen.push(candidates[randInt(0,candidates.length-1)]);
+  }
+  return chosen;
+}
+
+/* ================== GAME STATE ================== */
+let maze, cellCenters;
+let player, bots, items, generator;
+let collectedKeys = 0;
+let gameState = 'menu'; // menu | playing | ended
+let endResult = null;
+let endScreenShown = false;
+const camera = { x:0, y:0 };
+const keys = {};
+
+function makeAllyBot(spawn){
+  return {
+    x: spawn.x, y: spawn.y, r: 9, role:'ally', isPlayer:false, alive:true,
+    carryingGas:false, state:'seek', path:[], recomputeTimer:0, fleeTimer:0, targetItemRef:null
+  };
+}
+function makeKillerBot(spawn){
+  const patrolPoints = pickSpawnPoints(6, [], TILE*5);
+  return {
+    x: spawn.x, y: spawn.y, r: 10, role:'killer', isPlayer:false, alive:true,
+    state:'patrol', path:[], recomputeTimer:0, patrolPoints, patrolIndex:0,
+    chaseTarget:null, lastSeenTimer:0
+  };
+}
+
+function initGame(allyCount, playerRole){
+  maze = generateMaze(COLS, ROWS);
+  cellCenters = buildCellCenters();
+
+  const spawnPts = pickSpawnPoints(allyCount+1, [], TILE*5);
+  const killerSpawn = spawnPts[0];
+  const allySpawns = spawnPts.slice(1);
+
+  bots = [];
+  player = { x:0, y:0, r:10, role:playerRole, isPlayer:true, alive:true, carryingGas:false };
+
+  if(playerRole === 'killer'){
+    player.x = killerSpawn.x; player.y = killerSpawn.y;
+    for(let i=0;i<allyCount;i++) bots.push(makeAllyBot(allySpawns[i]));
+  } else {
+    player.x = allySpawns[0].x; player.y = allySpawns[0].y;
+    for(let i=1;i<allyCount;i++) bots.push(makeAllyBot(allySpawns[i]));
+    bots.push(makeKillerBot(killerSpawn));
+  }
+
+  const usedForItems = [...spawnPts];
+  const itemPts = pickSpawnPoints(8, usedForItems, TILE*3.2);
+  items = [];
+  for(let i=0;i<4;i++) items.push({ type:'key', x:itemPts[i].x, y:itemPts[i].y });
+  for(let i=4;i<8;i++) items.push({ type:'gas', x:itemPts[i].x, y:itemPts[i].y });
+
+  const genPts = pickSpawnPoints(1, [...spawnPts, ...itemPts], TILE*3);
+  generator = { x:genPts[0].x, y:genPts[0].y, fuel:0 };
+
+  collectedKeys = 0;
+  endResult = null;
+  endScreenShown = false;
+  gameState = 'playing';
+
+  document.getElementById('hud').classList.remove('hidden');
+  document.getElementById('controlsHint').classList.remove('hidden');
+}
+
+function getKillerEntity(){
+  if(player.role === 'killer') return player;
+  return bots.find(b => b.role === 'killer');
+}
+function getAliveAllies(){
+  const list = [];
+  if(player.role === 'ally' && player.alive) list.push(player);
+  for(const b of bots){ if(b.role==='ally' && b.alive) list.push(b); }
+  return list;
+}
+
+/* ================== AI: ALLY BOT ================== */
+function findNearestItem(bot){
+  let best=null, bestD=Infinity;
+  for(const it of items){
+    const d = dist(bot,it);
+    if(d<bestD){ bestD=d; best=it; }
+  }
+  return best;
+}
+function findFleeTile(bot, killer){
+  let best=null, bestScore=-Infinity;
+  const candidates = cellCenters;
+  for(let i=0;i<candidates.length;i+=1){
+    const c = candidates[i];
+    const dAway = dist(c, killer);
+    const dSelf = dist(c, bot);
+    if(dSelf > TILE*10) continue; // jangan terlalu jauh biar path masuk akal
+    const score = dAway - dSelf*0.15;
+    if(score > bestScore){ bestScore = score; best = c; }
+  }
+  return best || bot;
+}
+
+function updateAllyBot(bot, dt){
+  const killer = getKillerEntity();
+  const bTile = tileOf(bot), kTile = tileOf(killer);
+  const d = dist(bot, killer);
+  const visible = d < KILLER_VISION_TILES*TILE * 1.05 && hasLineOfSight(bTile,kTile);
+
+  if(visible && d < FLEE_TRIGGER_TILES*TILE){
+    if(bot.state !== 'flee'){ bot.state='flee'; bot.path=[]; }
+    bot.fleeTimer = FLEE_MEMORY;
+  } else if(bot.state === 'flee'){
+    bot.fleeTimer -= dt;
+    if(bot.fleeTimer <= 0){ bot.state = bot.carryingGas ? 'deposit' : 'seek'; bot.path=[]; }
+  }
+
+  bot.recomputeTimer -= dt;
+  const needRecompute = bot.recomputeTimer <= 0 || bot.path.length===0;
+
+  if(bot.state === 'flee'){
+    if(needRecompute){
+      const fleeTile = findFleeTile(bot, killer);
+      bot.path = bfsPath(bTile, tileOf(fleeTile));
+      bot.recomputeTimer = PATH_RECOMPUTE_INTERVAL;
+    }
+    followPath(bot, dt, SPEED_ALLY_FLEE);
+    return;
+  }
+
+  if(bot.carryingGas){
+    bot.state = 'deposit';
+    if(needRecompute){
+      bot.path = bfsPath(bTile, tileOf(generator));
+      bot.recomputeTimer = PATH_RECOMPUTE_INTERVAL;
+    }
+  } else {
+    bot.state = 'seek';
+    if(needRecompute){
+      const target = findNearestItem(bot);
+      if(target){
+        bot.path = bfsPath(bTile, tileOf(target));
+      }
+      bot.recomputeTimer = PATH_RECOMPUTE_INTERVAL;
+    }
+  }
+  followPath(bot, dt, SPEED_ALLY_NORMAL);
+}
+
+/* ================== AI: KILLER BOT ================== */
+function updateKillerBot(bot, dt){
+  const bTile = tileOf(bot);
+  let target=null, bestD=Infinity;
+  for(const ally of getAliveAllies()){
+    const d = dist(bot, ally);
+    if(d < KILLER_VISION_TILES*TILE && hasLineOfSight(bTile, tileOf(ally))){
+      if(d < bestD){ bestD=d; target=ally; }
+    }
+  }
+
+  if(target){
+    bot.state='chase'; bot.chaseTarget=target; bot.lastSeenTimer=CHASE_MEMORY;
+  } else if(bot.state==='chase'){
+    bot.lastSeenTimer -= dt;
+    if(bot.lastSeenTimer <= 0){ bot.state='patrol'; bot.chaseTarget=null; bot.path=[]; }
+  }
+
+  bot.recomputeTimer -= dt;
+  const needRecompute = bot.recomputeTimer <= 0 || bot.path.length===0;
+
+  if(bot.state === 'chase' && bot.chaseTarget && bot.chaseTarget.alive){
+    if(needRecompute){
+      bot.path = bfsPath(bTile, tileOf(bot.chaseTarget));
+      bot.recomputeTimer = PATH_RECOMPUTE_INTERVAL;
+    }
+    followPath(bot, dt, SPEED_KILLER_CHASE);
+  } else {
+    if(bot.path.length===0){
+      bot.patrolIndex = (bot.patrolIndex+1) % bot.patrolPoints.length;
+      bot.path = bfsPath(bTile, tileOf(bot.patrolPoints[bot.patrolIndex]));
+    }
+    followPath(bot, dt, SPEED_KILLER_PATROL);
+  }
+}
+
+function followPath(entity, dt, speed){
+  if(!entity.path || entity.path.length===0) return;
+  const t = entity.path[0];
+  const dx = t.x-entity.x, dy = t.y-entity.y;
+  const d = Math.hypot(dx,dy);
+  if(d < 5){ entity.path.shift(); return; }
+  const vx = dx/d*speed*dt, vy = dy/d*speed*dt;
+  moveEntity(entity, vx, vy);
+}
+
+/* ================== PLAYER ================== */
+function updatePlayer(dt){
+  if(!player.alive) return;
+  let dx=0, dy=0;
+  if(keys['w']) dy -= 1;
+  if(keys['s']) dy += 1;
+  if(keys['a']) dx -= 1;
+  if(keys['d']) dx += 1;
+  if(dx!==0 && dy!==0){ dx*=0.7071; dy*=0.7071; }
+  const spd = SPEED_PLAYER;
+  moveEntity(player, dx*spd*dt, dy*spd*dt);
+}
+
+/* ================== ITEMS / GENERATOR / KILL LOGIC ================== */
+function handleItemPickups(){
+  const carriers = getAliveAllies();
+  for(const c of carriers){
+    for(let i=items.length-1;i>=0;i--){
+      const it = items[i];
+      if(dist(c,it) < PICKUP_RADIUS){
+        if(it.type==='key'){
+          collectedKeys++;
+          items.splice(i,1);
+        } else if(it.type==='gas'){
+          if(!c.carryingGas){
+            c.carryingGas = true;
+            items.splice(i,1);
+          }
+        }
+      }
+    }
+  }
+}
+function handleGeneratorDeposit(){
+  for(const c of getAliveAllies()){
+    if(c.carryingGas && dist(c,generator) < PICKUP_RADIUS+8){
+      generator.fuel = Math.min(4, generator.fuel+1);
+      c.carryingGas = false;
+    }
+  }
+}
+function killAlly(target){
+  target.alive = false;
+  if(!target.isPlayer && target.carryingGas){
+    items.push({ type:'gas', x:target.x, y:target.y });
+  }
+  if(target.isPlayer){
+    gameState = 'ended';
+    endResult = { outcome:'playerDead' };
+  }
+}
+function handleKillCollisions(){
+  if(gameState !== 'playing') return;
+  const killer = getKillerEntity();
+  for(const ally of getAliveAllies()){
+    if(dist(killer, ally) < killer.r + ally.r + KILL_RADIUS - 15){
+      killAlly(ally);
+      if(gameState !== 'playing') return;
+    }
+  }
+}
+function checkWinLose(){
+  if(gameState !== 'playing') return;
+  if(collectedKeys >= 4 && generator.fuel >= 4){
+    gameState = 'ended';
+    endResult = { outcome:'allyWin' };
+    return;
+  }
+  if(getAliveAllies().length === 0){
+    gameState = 'ended';
+    endResult = { outcome:'killerWin' };
+  }
+}
+
+/* ================== CAMERA / RENDER ================== */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function updateCamera(){
+  camera.x = clamp(player.x - canvas.width/2, 0, Math.max(0, WORLD_W - canvas.width));
+  camera.y = clamp(player.y - canvas.height/2, 0, Math.max(0, WORLD_H - canvas.height));
+}
+
+function drawEntity(e, color, isKillerEnt){
+  if(!e.alive) return;
+  ctx.beginPath();
+  ctx.fillStyle = color;
+  ctx.arc(e.x, e.y, e.r, 0, Math.PI*2);
+  ctx.fill();
+  if(e.isPlayer){
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+  }
+  if(isKillerEnt){
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#3a0000';
+    ctx.stroke();
+  }
+}
+
+function render(){
+  ctx.fillStyle = '#08080b';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  if(gameState === 'menu'){ return; }
+
+  ctx.save();
+  ctx.translate(-camera.x, -camera.y);
+
+  // background of maze area
+  ctx.fillStyle = '#17171f';
+  ctx.fillRect(0,0,WORLD_W, WORLD_H);
+
+  // vision range for killer (only meaningful visual, tidak dianggap minimap)
+  const killer = getKillerEntity();
+  if(player.role === 'killer'){
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(255,80,80,0.06)';
+    ctx.arc(player.x, player.y, KILLER_VISION_TILES*TILE, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // walls
+  ctx.fillStyle = '#3d3d4d';
+  const x0 = Math.max(0, Math.floor(camera.x/TILE)-1);
+  const y0 = Math.max(0, Math.floor(camera.y/TILE)-1);
+  const x1 = Math.min(maze[0].length, Math.ceil((camera.x+canvas.width)/TILE)+1);
+  const y1 = Math.min(maze.length, Math.ceil((camera.y+canvas.height)/TILE)+1);
+  for(let ty=y0; ty<y1; ty++){
+    for(let tx=x0; tx<x1; tx++){
+      if(maze[ty][tx]===1){
+        ctx.fillRect(tx*TILE, ty*TILE, TILE, TILE);
+      }
+    }
+  }
+
+  // generator
+  ctx.fillStyle = '#2b2b36';
+  ctx.fillRect(generator.x-18, generator.y-18, 36, 36);
+  ctx.strokeStyle = generator.fuel>=4 ? '#6fd08c' : '#8a8a96';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(generator.x-18, generator.y-18, 36, 36);
+  ctx.font = '20px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('⚙️', generator.x, generator.y-2);
+  // fuel bar
+  ctx.fillStyle = '#0f0f14';
+  ctx.fillRect(generator.x-18, generator.y-28, 36, 6);
+  ctx.fillStyle = '#f4a261';
+  ctx.fillRect(generator.x-18, generator.y-28, 36*(generator.fuel/4), 6);
+
+  // items
+  ctx.font = '18px sans-serif';
+  for(const it of items){
+    ctx.fillText(it.type==='key' ? '🔑' : '⛽', it.x, it.y);
+  }
+
+  // ally bots
+  for(const b of bots){
+    if(b.role==='ally') drawEntity(b, '#6fd08c', false);
+  }
+  // killer bot
+  for(const b of bots){
+    if(b.role==='killer') drawEntity(b, '#e63946', true);
+  }
+  // player (drawn last, always on top)
+  drawEntity(player, player.role==='killer' ? '#ff6b6b' : '#4ecb71', player.role==='killer');
+
+  ctx.restore();
+}
+
+/* ================== HUD ================== */
+function updateHud(){
+  const hud = document.getElementById('hud');
+  if(gameState !== 'playing'){ return; }
+  const roleClass = player.role==='killer' ? 'role-killer' : 'role-ally';
+  const roleLabel = player.role==='killer' ? 'KILLER' : 'ALLY';
+  let html = `Peran kamu: <span class="${roleClass}">${roleLabel}</span><br>`;
+  html += `🔑 Kunci: ${collectedKeys}/4 &nbsp; ⚙️ Generator: ${generator.fuel}/4<br>`;
+  if(player.role === 'ally'){
+    html += player.carryingGas ? `<span class="warn">Membawa Bensin ⛽</span>` : `Tidak membawa item`;
+  } else {
+    html += `Ally tersisa: ${getAliveAllies().length}`;
+  }
+  hud.innerHTML = html;
+}
+
+/* ================== MAIN LOOP ================== */
+let lastTime = null;
+function loop(now){
+  if(lastTime===null) lastTime = now;
+  let dt = (now-lastTime)/1000;
+  dt = Math.min(dt, 0.05);
+  lastTime = now;
+
+  if(gameState === 'playing'){
+    updatePlayer(dt);
+    for(const b of bots){
+      if(!b.alive) continue;
+      if(b.role==='ally') updateAllyBot(b, dt);
+      else updateKillerBot(b, dt);
+    }
+    handleItemPickups();
+    handleGeneratorDeposit();
+    handleKillCollisions();
+    checkWinLose();
+    updateCamera();
+    updateHud();
+    if(gameState === 'ended' && !endScreenShown){
+      endScreenShown = true;
+      showEndScreen();
+    }
+  }
+  render();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ================== INPUT ================== */
+window.addEventListener('keydown', e=>{
+  const k = e.key.toLowerCase();
+  if(['w','a','s','d'].includes(k)) keys[k]=true;
+});
+window.addEventListener('keyup', e=>{
+  const k = e.key.toLowerCase();
+  if(['w','a','s','d'].includes(k)) keys[k]=false;
+});
+
+/* ================== UI FLOW ================== */
+const screenStart = document.getElementById('screenStart');
+const screenConfig = document.getElementById('screenConfig');
+const screenReveal = document.getElementById('screenReveal');
+const screenEnd = document.getElementById('screenEnd');
+const roleTextEl = document.getElementById('roleText');
+const roleDescEl = document.getElementById('roleDesc');
+const btnPlay = document.getElementById('btnPlay');
+
+let pendingAllyCount = 4;
+let pendingRole = 'ally';
+
+document.getElementById('btnStart').onclick = () => {
+  screenStart.classList.add('hidden');
+  screenConfig.classList.remove('hidden');
+};
+
+document.getElementById('btnConfigNext').onclick = () => {
+  const val = clamp(parseInt(document.getElementById('allyCountInput').value)||4, 1, 5);
+  pendingAllyCount = val;
+  screenConfig.classList.add('hidden');
+  screenReveal.classList.remove('hidden');
+  btnPlay.classList.add('hidden');
+  roleDescEl.textContent = '';
+  startRoleSpin();
+};
+
+function startRoleSpin(){
+  let count = 0;
+  const spin = setInterval(()=>{
+    roleTextEl.textContent = Math.random()<0.5 ? 'ALLY' : 'KILLER';
+    count++;
+    if(count > 14){
+      clearInterval(spin);
+      pendingRole = Math.random() < 0.5 ? 'ally' : 'killer';
+      roleTextEl.textContent = pendingRole==='killer' ? 'KILLER' : 'ALLY';
+      roleTextEl.style.color = pendingRole==='killer' ? '#ff6b6b' : '#6fd08c';
+      roleDescEl.textContent = pendingRole==='killer'
+        ? 'Buru dan bunuh semua Ally sebelum mereka menyalakan generator.'
+        : 'Cari 4 kunci dan kumpulkan 4 bensin untuk menyalakan generator. Hindari Killer!';
+      btnPlay.classList.remove('hidden');
+    }
+  }, 90);
+}
+
+btnPlay.onclick = () => {
+  screenReveal.classList.add('hidden');
+  roleTextEl.style.color = '#ffd166';
+  initGame(pendingAllyCount, pendingRole);
+};
+
+function showEndScreen(){
+  const titleEl = document.getElementById('endTitle');
+  const descEl = document.getElementById('endDesc');
+  const outcome = endResult.outcome;
+
+  if(outcome === 'playerDead'){
+    titleEl.textContent = 'Kamu Tertangkap!';
+    descEl.textContent = 'Killer berhasil menangkapmu. Game over.';
+  } else if(outcome === 'allyWin'){
+    titleEl.textContent = player.role==='ally' ? 'Ally Menang!' : 'Kamu Kalah';
+    descEl.textContent = 'Semua kunci terkumpul dan generator berhasil menyala. Ally berhasil selamat.';
+  } else if(outcome === 'killerWin'){
+    titleEl.textContent = player.role==='killer' ? 'Killer Menang!' : 'Kamu Kalah';
+    descEl.textContent = 'Semua Ally berhasil dibunuh oleh Killer.';
+  }
+
+  document.getElementById('hud').classList.add('hidden');
+  document.getElementById('controlsHint').classList.add('hidden');
+  screenEnd.classList.remove('hidden');
+}
+
+document.getElementById('btnBackMenu').onclick = () => {
+  screenEnd.classList.add('hidden');
+  screenStart.classList.remove('hidden');
+  gameState = 'menu';
+};
+
+})();
+</script>
+</body>
+</html>

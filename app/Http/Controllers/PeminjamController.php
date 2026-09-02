@@ -59,4 +59,14 @@ class PeminjamController extends Controller
 
         return view('peminjam.riwayat', compact('peminjaman'));
     }
+    public function kembalikan($id){
+        $peminjaman = Peminjaman::where('user_id', auth()->id())
+        ->where('id', $id)
+        ->where('status', 'dipinjam')
+        ->firstOrFail();
+
+        $peminjaman->update(['status' => 'menunggu_verifikasi']);
+         return redirect()->back()->with('success', 'Pengembalian berhasil diajukan. Menunggu verifikasi petugas.');
+
+    }
 }

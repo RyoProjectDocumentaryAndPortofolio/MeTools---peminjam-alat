@@ -40,15 +40,15 @@
                     <th>Rencana Kembali</th>
                     <th>Status</th>
                     <th>Alat yang Dipinjam</th>
-                    <th width="200">Aksi</th>
+                    <th width="220">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($peminjamans as $item)
                     <tr>
                         <td class="peminjam-name">{{ $item->user->name ?? 'Unknown' }}</td>
-                        <td>{{ $item->tgl_pinjam }}</td>
-                        <td>{{ $item->tgl_kembali_plan }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->tgl_pinjam)->format('d-m-Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->tgl_kembali_plan)->format('d-m-Y') }}</td>
                         <td>
                             <span class="status-badge {{ $item->status }}">
                                 {{ ucfirst($item->status) }}
@@ -64,6 +64,7 @@
                         <td>
                             <div class="action-buttons">
                                 @if($item->status == 'diajukan')
+                                    <!-- Setujui Peminjaman -->
                                     <form action="{{ route('petugas.peminjaman.setujui', $item->id) }}" method="POST">
                                         @csrf
                                         <button type="submit" class="btn-approve" onclick="return confirm('Setujui peminjaman ini?')">
@@ -72,13 +73,23 @@
                                         </button>
                                     </form>
                                 @elseif($item->status == 'dipinjam')
-                                    <form action="{{ route('petugas.peminjaman.proses', $item->id) }}" method="POST" onsubmit="return confirm('Proses pengembalian alat ini?')">
+                                    <!-- Proses Pengembalian -->
+                                    <form action="{{ route('petugas.pengembalian.proses', $item->id) }}" method="POST" onsubmit="return confirm('Proses pengembalian alat ini?')">
                                         @csrf
                                         <input type="hidden" name="kondisi_kembali" value="Baik">
-                                        <input type="hidden" name="denda" value="0">
+                                        <input type="hidden" name="denda_kerusakan" value="0">
                                         <button type="submit" class="btn-return">
                                             <span class="material-symbols-outlined">swap_horiz</span>
                                             Proses Kembali
+                                        </button>
+                                    </form>
+                                @elseif($item->status == 'menunggu_verifikasi')
+                                    <!-- Verifikasi Pengembalian -->
+                                    <form action="{{ route('petugas.verifikasi.kembali', $item->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn-verify" onclick="return confirm('Verifikasi pengembalian alat ini?')">
+                                            <span class="material-symbols-outlined">verified</span>
+                                            Verifikasi
                                         </button>
                                     </form>
                                 @else

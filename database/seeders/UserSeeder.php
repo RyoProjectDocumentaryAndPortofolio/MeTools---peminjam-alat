@@ -20,6 +20,22 @@ class UserSeeder extends Seeder
                 'alamat' => 'Bandung, West Java',
             ],
             [
+                'name' => 'Ryo Ramadhan A',
+                'email' => 'ryoadmin@gmail.com',
+                'password' => Hash::make('password123'),
+                'role'  => 'admin',
+                'no_hp' => '081234567890',
+                'alamat' => 'Bandung, West Java',
+            ],
+                [
+                'name' => 'Ryo Ramadhan Akbar',
+                'email' => 'ryopetugas@gmail.com',
+                'password' => Hash::make('password123'),
+                'role'  => 'admin',
+                'no_hp' => '081234567890',
+                'alamat' => 'Bandung, West Java',
+            ],
+            [
                 'name' => 'admin',
                 'email' => 'admin@gmail.com',
                 'password' => Hash::make('admin'),

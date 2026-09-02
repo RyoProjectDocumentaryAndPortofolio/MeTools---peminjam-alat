@@ -21,7 +21,7 @@ class User extends Authenticatable
         'role',
         'no_hp',
         'alamat',
-        'foto_profile'  // ← Perbaiki: tanpa spasi
+        'foto_profile'
     ];
 
     protected $hidden = [
@@ -46,4 +46,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(LogAktivitas::class);
     }
+
 }

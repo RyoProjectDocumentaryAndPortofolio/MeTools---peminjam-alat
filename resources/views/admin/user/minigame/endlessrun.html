@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Steampunk Dungeon Run</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1e1a14;
+            font-family: 'Courier New', monospace;
+            background-image: radial-gradient(circle at 20% 30%, #3d3429, #171305);
+        }
+        .container {
+            background: #1f1b16;
+            padding: 25px 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 0 2px #6a5f3a, 0 20px 60px rgba(0,0,0,0.9);
+            border: 2px solid #b89a5b;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+        }
+        .container::before {
+            content: "⬡ ⬡ ⬡";
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f1b16;
+            padding: 0 16px;
+            color: #b89a5b;
+            font-size: 14px;
+            letter-spacing: 6px;
+        }
+        h1 {
+            color: #e2c27a;
+            font-size: 24px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-weight: 400;
+            font-family: 'Times New Roman', serif;
+            text-shadow: 0 0 10px #b89a5b55;
+        }
+        h1 span { color: #d4af37; font-weight: bold; }
+        .status {
+            display: flex;
+            justify-content: space-between;
+            color: #b89a5b;
+            font-size: 16px;
+            margin: 12px 0 16px 0;
+            padding: 8px 10px;
+            border: 1px dashed #6a5f3a;
+            border-radius: 8px;
+        }
+        .status span { color: #f0d58c; font-weight: bold; }
+        canvas {
+            border: 3px solid #b89a5b;
+            border-radius: 12px;
+            background: #1f1b16;
+            box-shadow: inset 0 0 40px #0f0d0a, 0 0 30px #b89a5b33;
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 1 / 1.2;
+        }
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        button {
+            padding: 10px 28px;
+            border: 2px solid #b89a5b;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #2a241e;
+            color: #d4af37;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 0 0 1px #6a5f3a;
+        }
+        button:hover {
+            background: #b89a5b;
+            color: #1f1b16;
+            box-shadow: 0 0 30px #b89a5b88;
+            transform: scale(1.03);
+        }
+        .info {
+            color: #7a6f50;
+            font-size: 13px;
+            margin-top: 12px;
+            border-top: 1px dashed #6a5f3a;
+            padding-top: 12px;
+        }
+        .info kbd {
+            background: #2a241e;
+            border: 1px solid #6a5f3a;
+            padding: 2px 12px;
+            border-radius: 30px;
+            color: #d4af37;
+        }
+        @media (max-width: 500px) {
+            .container { padding: 16px; }
+            h1 { font-size: 18px; }
+            .status { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1><span>⚙</span> DUNGEON <span>RUN</span> <span>⚙</span></h1>
+    <div class="status">
+        <div>🪙 Coin: <span id="coinDisplay">0</span></div>
+        <div>💎 Diamond: <span id="diamondDisplay">0</span></div>
+        <div>🏃 Distance: <span id="distDisplay">0</span>m</div>
+    </div>
+    <canvas id="gameCanvas" width="400" height="480"></canvas>
+    <div class="controls">
+        <button id="jumpBtn">⬆ Jump</button>
+        <button id="restartBtn">⟳ Restart</button>
+    </div>
+    <div class="info">
+        <kbd>⬆</kbd> <kbd>Space</kbd> atau tap tombol Jump • Hindari rintangan!
+    </div>
+</div>
+
+<script>
+    (function(){
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = 400, H = 480;
+
+        // ----- Game state -----
+        let player, obstacles, coins, diamonds, score, gameOver;
+        let frame = 0, speed = 4, groundY = 400;
+        let coinCount = 0, diamondCount = 0, distance = 0;
+        let jumpPower = -9, gravity = 0.5;
+        let gameLoop;
+
+        // UI elements
+        const coinDisplay = document.getElementById('coinDisplay');
+        const diamondDisplay = document.getElementById('diamondDisplay');
+        const distDisplay = document.getElementById('distDisplay');
+
+        // ----- Init -----
+        function init() {
+            player = {
+                x: 60,
+                y: groundY - 40,
+                w: 28,
+                h: 40,
+                vy: 0,
+                isJumping: false
+            };
+            obstacles = [];
+            coins = [];
+            diamonds = [];
+            score = 0;
+            distance = 0;
+            speed = 4;
+            frame = 0;
+            gameOver = false;
+            coinCount = 0;
+            diamondCount = 0;
+            updateUI();
+            clearInterval(gameLoop);
+            gameLoop = setInterval(update, 1000 / 60);
+        }
+
+        // ----- Spawn -----
+        function spawnObstacle() {
+            const type = Math.random() > 0.6 ? 'tall' : 'short';
+            const h = type === 'tall' ? 40 : 28;
+            obstacles.push({
+                x: W,
+                y: groundY - h,
+                w: 20,
+                h: h,
+                type: type
+            });
+        }
+
+        function spawnCoin() {
+            coins.push({
+                x: W + Math.random() * 60,
+                y: groundY - 50 - Math.random() * 80,
+                r: 10,
+                collected: false
+            });
+        }
+
+        function spawnDiamond() {
+            diamonds.push({
+                x: W + Math.random() * 80,
+                y: groundY - 70 - Math.random() * 60,
+                r: 12,
+                collected: false
+            });
+        }
+
+        // ----- Update -----
+        function update() {
+            if (gameOver) return;
+
+            frame++;
+            distance += Math.floor(speed / 2);
+            speed += 0.002;
+
+            // Spawn
+            if (frame % 50 === 0) spawnObstacle();
+            if (frame % 25 === 0) spawnCoin();
+            if (frame % 80 === 0) spawnDiamond();
+
+            // Player physics
+            if (player.isJumping) {
+                player.vy += gravity;
+                player.y += player.vy;
+                if (player.y >= groundY - player.h) {
+                    player.y = groundY - player.h;
+                    player.vy = 0;
+                    player.isJumping = false;
+                }
+            }
+
+            // Move objects
+            const move = (arr) => {
+                for (let i = arr.length - 1; i >= 0; i--) {
+                    arr[i].x -= speed;
+                    if (arr[i].x < -30) arr.splice(i, 1);
+                }
+            };
+            move(obstacles);
+            move(coins);
+            move(diamonds);
+
+            // Collision: obstacles
+            for (const obs of obstacles) {
+                if (rectCollide(player, obs)) {
+                    gameOver = true;
+                    clearInterval(gameLoop);
+                    break;
+                }
+            }
+
+            // Collision: coins
+            for (const c of coins) {
+                if (!c.collected && circleRectCollide(c, player)) {
+                    c.collected = true;
+                    coinCount++;
+                    updateUI();
+                }
+            }
+
+            // Collision: diamonds
+            for (const d of diamonds) {
+                if (!d.collected && circleRectCollide(d, player)) {
+                    d.collected = true;
+                    diamondCount++;
+                    updateUI();
+                }
+            }
+
+            // Update distance display
+            distDisplay.textContent = Math.floor(distance);
+        }
+
+        // ----- Collision helpers -----
+        function rectCollide(a, b) {
+            return a.x < b.x + b.w &&
+                   a.x + a.w > b.x &&
+                   a.y < b.y + b.h &&
+                   a.y + a.h > b.y;
+        }
+
+        function circleRectCollide(circle, rect) {
+            const cx = circle.x, cy = circle.y, r = circle.r;
+            const rx = rect.x, ry = rect.y, rw = rect.w, rh = rect.h;
+            const nearX = Math.max(rx, Math.min(cx, rx + rw));
+            const nearY = Math.max(ry, Math.min(cy, ry + rh));
+            const dx = cx - nearX, dy = cy - nearY;
+            return (dx * dx + dy * dy) < (r * r);
+        }
+
+        // ----- Draw (Steampunk style) -----
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+
+            // Background dungeon
+            const grad = ctx.createLinearGradient(0, 0, 0, H);
+            grad.addColorStop(0, '#1a1612');
+            grad.addColorStop(0.7, '#2a241e');
+            grad.addColorStop(1, '#1f1b16');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Ground (steampunk grid)
+            ctx.fillStyle = '#2a241e';
+            ctx.fillRect(0, groundY, W, H - groundY);
+            ctx.fillStyle = '#3d3429';
+            for (let x = 0; x < W; x += 25) {
+                ctx.fillRect(x, groundY, 1, 6);
+            }
+            ctx.strokeStyle = '#3d3429';
+            ctx.lineWidth = 1;
+            for (let y = groundY + 10; y < H; y += 16) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(W, y);
+                ctx.stroke();
+            }
+
+            // Gear decorations
+            ctx.fillStyle = '#3d3429';
+            for (let i = 0; i < 6; i++) {
+                const gx = (i * 70 + 20) % W;
+                const gy = groundY + 18 + (i % 3) * 18;
+                ctx.beginPath();
+                ctx.arc(gx, gy, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(gx + 12, gy + 6, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Coins
+            for (const c of coins) {
+                if (c.collected) continue;
+                ctx.shadowColor = '#d4af37';
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = '#d4af37';
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#b89a5b';
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, c.r * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                // Gear detail
+                for (let i = 0; i < 6; i++) {
+                    const a = (i / 6) * Math.PI * 2 + Date.now() * 0.001;
+                    const dx = c.x + Math.cos(a) * (c.r + 2);
+                    const dy = c.y + Math.sin(a) * (c.r + 2);
+                    ctx.fillStyle = '#d4af37';
+                    ctx.beginPath();
+                    ctx.arc(dx, dy, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.shadowBlur = 0;
+            }
+
+            // Diamonds
+            for (const d of diamonds) {
+                if (d.collected) continue;
+                ctx.shadowColor = '#00e5ff';
+                ctx.shadowBlur = 18;
+                ctx.fillStyle = '#00e5ff';
+                ctx.beginPath();
+                ctx.moveTo(d.x, d.y - d.r);
+                ctx.lineTo(d.x + d.r, d.y);
+                ctx.lineTo(d.x, d.y + d.r);
+                ctx.lineTo(d.x - d.r, d.y);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#80deea';
+                ctx.beginPath();
+                ctx.moveTo(d.x, d.y - d.r * 0.4);
+                ctx.lineTo(d.x + d.r * 0.4, d.y);
+                ctx.lineTo(d.x, d.y + d.r * 0.4);
+                ctx.lineTo(d.x - d.r * 0.4, d.y);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            // Obstacles (steampunk pipes)
+            for (const obs of obstacles) {
+                ctx.shadowColor = '#b53b2a';
+                ctx.shadowBlur = 6;
+                const gradObs = ctx.createLinearGradient(obs.x, obs.y, obs.x + obs.w, obs.y);
+                gradObs.addColorStop(0, '#6a5f3a');
+                gradObs.addColorStop(0.5, '#b89a5b');
+                gradObs.addColorStop(1, '#6a5f3a');
+                ctx.fillStyle = gradObs;
+                ctx.beginPath();
+                ctx.roundRect(obs.x, obs.y, obs.w, obs.h, 4);
+                ctx.fill();
+                // Rivet
+                ctx.fillStyle = '#3d3429';
+                ctx.beginPath();
+                ctx.arc(obs.x + 4, obs.y + 6, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(obs.x + obs.w - 4, obs.y + 6, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            // Player (Steampunk character)
+            const px = player.x, py = player.y;
+            // Body (copper)
+            ctx.shadowColor = '#d4af37';
+            ctx.shadowBlur = 8;
+            const gradP = ctx.createLinearGradient(px, py, px + player.w, py);
+            gradP.addColorStop(0, '#b89a5b');
+            gradP.addColorStop(0.5, '#d4af37');
+            gradP.addColorStop(1, '#8a7a4a');
+            ctx.fillStyle = gradP;
+            ctx.beginPath();
+            ctx.roundRect(px, py, player.w, player.h, 6);
+            ctx.fill();
+
+            // Gear on body
+            ctx.fillStyle = '#6a5f3a';
+            ctx.beginPath();
+            ctx.arc(px + player.w/2, py + player.h/2, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#d4af37';
+            ctx.beginPath();
+            ctx.arc(px + player.w/2, py + player.h/2, 4, 0, Math.PI * 2);
+            ctx.fill();
+            // Rivet
+            ctx.fillStyle = '#3d3429';
+            ctx.beginPath();
+            ctx.arc(px + 4, py + 4, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(px + player.w - 4, py + 4, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            // Goggles
+            ctx.fillStyle = '#2a241e';
+            ctx.beginPath();
+            ctx.arc(px + 6, py + 8, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(px + player.w - 6, py + 8, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#80deea';
+            ctx.beginPath();
+            ctx.arc(px + 6, py + 8, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(px + player.w - 6, py + 8, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Game over overlay
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(15,13,10,0.7)';
+                ctx.fillRect(0, 0, W, H);
+                ctx.fillStyle = '#b53b2a';
+                ctx.font = 'bold 38px "Times New Roman", serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = '#b53b2a';
+                ctx.shadowBlur = 25;
+                ctx.fillText('💀 CRUSHED', W/2, H/2 - 20);
+                ctx.shadowBlur = 0;
+                ctx.font = '18px "Courier New", monospace';
+                ctx.fillStyle = '#b89a5b';
+                ctx.fillText(`🪙 ${coinCount}  💎 ${diamondCount}  🏃 ${Math.floor(distance)}m`, W/2, H/2 + 45);
+            }
+        }
+
+        CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+            if (w < 2*r) r = w/2;
+            if (h < 2*r) r = h/2;
+            this.moveTo(x + r, y);
+            this.lineTo(x + w - r, y);
+            this.quadraticCurveTo(x + w, y, x + w, y + r);
+            this.lineTo(x + w, y + h - r);
+            this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            this.lineTo(x + r, y + h);
+            this.quadraticCurveTo(x, y + h, x, y + h - r);
+            this.lineTo(x, y + r);
+            this.quadraticCurveTo(x, y, x + r, y);
+            this.closePath();
+            return this;
+        };
+
+        // ----- Game loop (render) -----
+        function render() {
+            draw();
+            requestAnimationFrame(render);
+        }
+
+        // ----- Jump -----
+        function jump() {
+            if (gameOver) return;
+            if (!player.isJumping) {
+                player.vy = jumpPower;
+                player.isJumping = true;
+            }
+        }
+
+        // ----- UI update -----
+        function updateUI() {
+            coinDisplay.textContent = coinCount;
+            diamondDisplay.textContent = diamondCount;
+        }
+
+        // ----- Restart -----
+        function restart() {
+            clearInterval(gameLoop);
+            init();
+            render();
+        }
+
+        // ----- Controls -----
+        document.getElementById('jumpBtn').addEventListener('click', jump);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w' || e.key === 'W') {
+                e.preventDefault();
+                jump();
+            }
+        });
+        document.getElementById('restartBtn').addEventListener('click', restart);
+
+        // ----- Start -----
+        init();
+        render();
+    })();
+</script>
+
+</body>
+</html>

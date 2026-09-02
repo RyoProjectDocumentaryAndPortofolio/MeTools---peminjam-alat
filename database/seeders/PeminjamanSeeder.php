@@ -10,30 +10,35 @@ class PeminjamanSeeder extends Seeder
     public function run(): void
     {
         $peminjaman = [
+            // Peminjaman 1 - Rian (dikembalikan tepat waktu)
             [
-                'user_id' => 3, // Rian (Peminjam)
+                'user_id' => 3,
                 'tgl_pinjam' => '2026-06-01',
                 'tgl_kembali_plan' => '2026-06-04',
                 'status' => 'dikembalikan',
             ],
+            // Peminjaman 2 - Siti (dikembalikan tepat waktu)
             [
-                'user_id' => 4, // Siti (Peminjam)
+                'user_id' => 4,
                 'tgl_pinjam' => '2026-06-02',
                 'tgl_kembali_plan' => '2026-06-05',
                 'status' => 'dikembalikan',
             ],
+            // Peminjaman 3 - Eka (telat 3 hari)
             [
-                'user_id' => 5, // Eka (Peminjam)
+                'user_id' => 5,
                 'tgl_pinjam' => '2026-06-03',
                 'tgl_kembali_plan' => '2026-06-06',
                 'status' => 'telat',
             ],
+            // Peminjaman 4 - Rian (masih dipinjam)
             [
                 'user_id' => 3,
                 'tgl_pinjam' => '2026-06-08',
                 'tgl_kembali_plan' => '2026-06-11',
                 'status' => 'dipinjam',
             ],
+            // Peminjaman 5 - Siti (diajukan)
             [
                 'user_id' => 4,
                 'tgl_pinjam' => '2026-06-09',

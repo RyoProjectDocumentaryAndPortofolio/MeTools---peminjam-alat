@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Steampunk Card Battle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1e1a14;
+            font-family: 'Courier New', monospace;
+            background-image: radial-gradient(circle at 20% 30%, #3d3429, #171305);
+            padding: 20px;
+        }
+        .container {
+            background: #1f1b16;
+            padding: 25px 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 0 2px #6a5f3a, 0 20px 60px rgba(0,0,0,0.9);
+            border: 2px solid #b89a5b;
+            text-align: center;
+            max-width: 750px;
+            width: 100%;
+            position: relative;
+        }
+        .container::before {
+            content: "⬡ ⬡ ⬡";
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f1b16;
+            padding: 0 16px;
+            color: #b89a5b;
+            font-size: 14px;
+            letter-spacing: 6px;
+        }
+        h1 {
+            color: #e2c27a;
+            font-size: 26px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-weight: 400;
+            font-family: 'Times New Roman', serif;
+            text-shadow: 0 0 10px #b89a5b55;
+        }
+        h1 span { color: #d4af37; font-weight: bold; }
+        .status {
+            display: flex;
+            justify-content: space-between;
+            color: #b89a5b;
+            font-size: 15px;
+            margin: 12px 0 16px 0;
+            padding: 8px 10px;
+            border: 1px dashed #6a5f3a;
+            border-radius: 8px;
+        }
+        .status span { color: #f0d58c; font-weight: bold; }
+        .battlefield {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0 16px 0;
+        }
+        .player-area, .enemy-area {
+            flex: 1;
+            background: #2a241e;
+            border: 2px solid #6a5f3a;
+            border-radius: 12px;
+            padding: 12px 8px;
+            min-height: 140px;
+        }
+        .player-area { border-color: #d4af37; }
+        .enemy-area { border-color: #b53b2a; }
+        .area-label {
+            font-size: 12px;
+            color: #7a6f50;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+        .card-display {
+            font-size: 48px;
+            min-height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card-display .card-value {
+            font-size: 28px;
+            color: #e2c27a;
+            margin-left: 8px;
+            font-family: 'Times New Roman', serif;
+        }
+        .card-display .enemy-card-value {
+            color: #b53b2a;
+        }
+        .vs {
+            font-size: 32px;
+            color: #6a5f3a;
+            font-weight: bold;
+            font-family: 'Times New Roman', serif;
+            text-shadow: 0 0 20px #b89a5b33;
+        }
+        .hand-area {
+            margin: 12px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            min-height: 70px;
+        }
+        .card-btn {
+            background: #2a241e;
+            border: 2px solid #6a5f3a;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #d4af37;
+            min-width: 65px;
+            box-shadow: 0 0 0 1px #3d3429;
+        }
+        .card-btn:hover:not(:disabled) {
+            background: #b89a5b;
+            color: #1f1b16;
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #b89a5b66;
+        }
+        .card-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .card-btn .suit { display: block; font-size: 18px; }
+        .card-btn .rank { display: block; font-size: 16px; margin-top: -4px; }
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 28px;
+            border: 2px solid #b89a5b;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #2a241e;
+            color: #d4af37;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 0 0 1px #6a5f3a;
+        }
+        button:hover {
+            background: #b89a5b;
+            color: #1f1b16;
+            box-shadow: 0 0 30px #b89a5b88;
+            transform: scale(1.03);
+        }
+        .log-area {
+            margin-top: 12px;
+            padding: 10px;
+            background: #14110e;
+            border: 1px solid #3d3429;
+            border-radius: 8px;
+            min-height: 48px;
+            color: #b89a5b;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+        }
+        @media (max-width: 550px) {
+            .container { padding: 16px; }
+            h1 { font-size: 20px; letter-spacing: 2px; }
+            .battlefield { flex-direction: column; }
+            .vs { transform: rotate(90deg); }
+            .card-btn { min-width: 52px; font-size: 18px; padding: 6px 10px; }
+            .card-display { font-size: 36px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1><span>⚙</span> CARD <span>BATTLE</span> <span>⚙</span></h1>
+    <div class="status">
+        <div>🃏 Dek: <span id="deckCount">0</span></div>
+        <div>🏆 Skor: <span id="scoreDisplay">0</span></div>
+        <div>⚡ Streak: <span id="streakDisplay">0</span></div>
+    </div>
+
+    <div class="battlefield">
+        <div class="player-area">
+            <div class="area-label">◈ ANDA</div>
+            <div class="card-display" id="playerCardDisplay">🃏 <span class="card-value">?</span></div>
+        </div>
+        <div class="vs">⚔️</div>
+        <div class="enemy-area">
+            <div class="area-label">◈ MUSUH</div>
+            <div class="card-display" id="enemyCardDisplay">🃏 <span class="card-value enemy-card-value">?</span></div>
+        </div>
+    </div>
+
+    <div class="hand-area" id="handArea"></div>
+
+    <div class="controls">
+        <button id="newGameBtn">⟳ Game Baru</button>
+        <button id="battleBtn" disabled>⚔️ Battle!</button>
+    </div>
+    <div class="log-area" id="logArea">🃏 Pilih kartu dari tanganmu...</div>
+</div>
+
+<script>
+    (function(){
+        // ---------- STEAMPUNK CARD BATTLE ----------
+        const suits = ['♠','♥','♦','♣'];
+        const ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+        const rankValues = { '2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14 };
+
+        let deck = [];
+        let playerHand = [];
+        let enemyHand = [];
+        let playerScore = 0;
+        let streak = 0;
+        let selectedCardIndex = null;
+        let gameOver = false;
+
+        const handArea = document.getElementById('handArea');
+        const playerCardDisplay = document.getElementById('playerCardDisplay');
+        const enemyCardDisplay = document.getElementById('enemyCardDisplay');
+        const deckCountSpan = document.getElementById('deckCount');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const streakDisplay = document.getElementById('streakDisplay');
+        const logArea = document.getElementById('logArea');
+        const battleBtn = document.getElementById('battleBtn');
+
+        // ----- Bikin deck -----
+        function buildDeck() {
+            const d = [];
+            for (const suit of suits) {
+                for (const rank of ranks) {
+                    d.push({ suit, rank, value: rankValues[rank] });
+                }
+            }
+            return shuffle(d);
+        }
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // ----- Inisialisasi game -----
+        function initGame() {
+            deck = buildDeck();
+            playerHand = [];
+            enemyHand = [];
+            playerScore = 0;
+            streak = 0;
+            selectedCardIndex = null;
+            gameOver = false;
+            battleBtn.disabled = true;
+
+            // Bagikan 5 kartu ke player, 5 ke enemy
+            for (let i = 0; i < 5; i++) {
+                if (deck.length > 0) playerHand.push(deck.pop());
+                if (deck.length > 0) enemyHand.push(deck.pop());
+            }
+
+            updateUI();
+            logArea.innerHTML = '🃏 Pilih kartu dari tanganmu!';
+            document.querySelectorAll('.card-btn').forEach(b => b.disabled = false);
+            battleBtn.disabled = true;
+        }
+
+        // ----- AI pilih kartu (musuh) -----
+        function aiChooseCard() {
+            if (enemyHand.length === 0) return null;
+            // AI pilih kartu tertinggi
+            let best = enemyHand[0];
+            for (const card of enemyHand) {
+                if (card.value > best.value) best = card;
+            }
+            return best;
+        }
+
+        // ----- Battle! -----
+        function battle() {
+            if (gameOver) return;
+            if (selectedCardIndex === null || selectedCardIndex >= playerHand.length) {
+                logArea.innerHTML = '⚠️ Pilih kartu dulu!';
+                return;
+            }
+            if (enemyHand.length === 0 || playerHand.length === 0) {
+                checkGameOver();
+                return;
+            }
+
+            const playerCard = playerHand[selectedCardIndex];
+            const enemyCard = aiChooseCard();
+
+            // Tampilkan kartu di battlefield
+            playerCardDisplay.innerHTML = `${playerCard.suit} <span class="card-value">${playerCard.rank}</span>`;
+            enemyCardDisplay.innerHTML = `${enemyCard.suit} <span class="card-value enemy-card-value">${enemyCard.rank}</span>`;
+
+            // Bandingkan
+            let result = '';
+            let won = false;
+            if (playerCard.value > enemyCard.value) {
+                result = '✅ MENANG! +1 poin';
+                playerScore++;
+                streak++;
+                won = true;
+            } else if (playerCard.value < enemyCard.value) {
+                result = '❌ KALAH!';
+                streak = 0;
+                won = false;
+            } else {
+                result = '⚖️ SERI!';
+                streak = 0;
+                won = false;
+            }
+
+            // Hapus kartu yang dipakai
+            playerHand.splice(selectedCardIndex, 1);
+            const enemyIndex = enemyHand.indexOf(enemyCard);
+            if (enemyIndex !== -1) enemyHand.splice(enemyIndex, 1);
+
+            // Ambil kartu baru dari deck (jika masih ada)
+            if (deck.length > 0 && playerHand.length < 5) {
+                playerHand.push(deck.pop());
+            }
+            if (deck.length > 0 && enemyHand.length < 5) {
+                enemyHand.push(deck.pop());
+            }
+
+            // Log
+            let logMsg = `${result} (Kamu: ${playerCard.rank}${playerCard.suit} vs Musuh: ${enemyCard.rank}${enemyCard.suit})`;
+            logArea.innerHTML = logMsg;
+
+            // Reset selected
+            selectedCardIndex = null;
+            battleBtn.disabled = true;
+
+            // Cek game over
+            if (playerHand.length === 0 || enemyHand.length === 0 || deck.length === 0) {
+                checkGameOver();
+            }
+
+            updateUI();
+            document.querySelectorAll('.card-btn').forEach(b => b.disabled = false);
+        }
+
+        // ----- Cek game over -----
+        function checkGameOver() {
+            if (gameOver) return;
+            gameOver = true;
+            battleBtn.disabled = true;
+            document.querySelectorAll('.card-btn').forEach(b => b.disabled = true);
+
+            let msg = '';
+            if (playerHand.length === 0 && enemyHand.length === 0) {
+                if (playerScore > 0) msg = '🏆 KAMU MENANG!';
+                else if (playerScore === 0) msg = '⚖️ SERI!';
+                else msg = '💀 KAMU KALAH!';
+            } else if (playerHand.length === 0) {
+                msg = '💀 KAMU KALAH! (Kartu habis)';
+            } else if (enemyHand.length === 0) {
+                msg = '🏆 KAMU MENANG! (Musuh kehabisan kartu)';
+            } else {
+                if (playerScore > 0) msg = '🏆 KAMU MENANG!';
+                else msg = '💀 KAMU KALAH!';
+            }
+            logArea.innerHTML = `⚙️ ${msg} Skor akhir: ${playerScore}`;
+        }
+
+        // ----- Pilih kartu -----
+        function selectCard(index) {
+            if (gameOver) return;
+            if (index >= playerHand.length) return;
+            selectedCardIndex = index;
+            battleBtn.disabled = false;
+
+            // Highlight di tangan
+            document.querySelectorAll('.card-btn').forEach((btn, i) => {
+                btn.style.borderColor = (i === index) ? '#d4af37' : '#6a5f3a';
+                btn.style.boxShadow = (i === index) ? '0 0 20px #d4af3777' : 'none';
+            });
+            logArea.innerHTML = `🃏 Kamu pilih ${playerHand[index].rank}${playerHand[index].suit}`;
+        }
+
+        // ----- Update UI -----
+        function updateUI() {
+            // Tangan player
+            handArea.innerHTML = '';
+            if (playerHand.length === 0) {
+                handArea.innerHTML = '<span style="color:#6a5f3a;font-size:14px;">🃏 Tidak ada kartu</span>';
+            } else {
+                playerHand.forEach((card, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'card-btn';
+                    btn.innerHTML = `<span class="suit">${card.suit}</span><span class="rank">${card.rank}</span>`;
+                    btn.disabled = gameOver;
+                    btn.addEventListener('click', () => selectCard(i));
+                    handArea.appendChild(btn);
+                });
+            }
+
+            // Deck count
+            deckCountSpan.textContent = deck.length;
+
+            // Score & streak
+            scoreDisplay.textContent = playerScore;
+            streakDisplay.textContent = streak;
+
+            // Jika battle over, disable semua
+            if (gameOver) {
+                battleBtn.disabled = true;
+                document.querySelectorAll('.card-btn').forEach(b => b.disabled = true);
+            }
+
+            // Reset highlight jika kartu habis
+            if (selectedCardIndex !== null && selectedCardIndex >= playerHand.length) {
+                selectedCardIndex = null;
+                battleBtn.disabled = true;
+            }
+        }
+
+        // ----- New Game -----
+        function newGame() {
+            initGame();
+            playerCardDisplay.innerHTML = '🃏 <span class="card-value">?</span>';
+            enemyCardDisplay.innerHTML = '🃏 <span class="card-value enemy-card-value">?</span>';
+            document.querySelectorAll('.card-btn').forEach(b => {
+                b.style.borderColor = '#6a5f3a';
+                b.style.boxShadow = 'none';
+            });
+        }
+
+        // ----- Event listeners -----
+        document.getElementById('newGameBtn').addEventListener('click', newGame);
+        battleBtn.addEventListener('click', battle);
+
+        // ----- Start! -----
+        newGame();
+    })();
+</script>
+
+</body>
+</html>

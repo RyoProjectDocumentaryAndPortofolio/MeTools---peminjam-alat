@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Toolsme - Dashboard')</title>
+    <link rel="icon" type="image/png" href="{{ asset('toolsme.png') }}">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -55,13 +56,17 @@
                             <span class="material-symbols-outlined">category</span>
                             Kelola Kategori
                         </a>
+                        <a href="{{ route('admin.peminjaman.index') }}" class="nav-link {{ request()->routeIs('admin.peminjaman.*') ? 'active' : '' }}">
+                            <span class="material-symbols-outlined">assignment</span>
+                            Kelola Peminjaman
+                        </a>
+                        <a href="{{ route('admin.pengembalian.index') }}" class="nav-link {{ request()->routeIs('admin.pengembalian.*') ? 'active' : '' }}">
+                            <span class="material-symbols-outlined">swap_horiz</span>
+                            Kelola Pengembalian
+                        </a>
                         <a href="{{ route('admin.user.index') }}" class="nav-link {{ request()->routeIs('admin.user.*') ? 'active' : '' }}">
                             <span class="material-symbols-outlined">people</span>
                             Kelola User
-                        </a>
-                        <a href="#" class="nav-link">
-                            <span class="material-symbols-outlined">history</span>
-                            Log Aktivitas
                         </a>
                     @endif
 
@@ -73,10 +78,16 @@
                             <span class="material-symbols-outlined">assignment</span>
                             Peminjaman
                         </a>
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('petugas.pengembalian.index') }}" class="nav-link {{ request()->routeIs('petugas.pengembalian.*') ? 'active' : '' }}">
                             <span class="material-symbols-outlined">swap_horiz</span>
-                            Pengembalian
+                            Pemantauan Pengembalian
                         </a>
+                        <div class="header-actions">
+                            <a href="{{ route('petugas.laporan.pdf') }}" class="btn-pdf" target="_blank">
+                                <span class="material-symbols-outlined">picture_as_pdf</span>
+                                Cetak Laporan PDF
+                            </a>
+                        </div>
                     @endif
 
                     <!-- ============================================
@@ -102,7 +113,7 @@
                 <div class="rivet rivet-bl"></div>
                 <div class="rivet rivet-br"></div>
                 <p class="text-xs text-center text-on-surface-variant opacity-50">
-                    v1.0 · Steampunk
+                    ryoCompany
                 </p>
             </div>
 

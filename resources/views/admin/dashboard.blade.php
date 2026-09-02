@@ -4,10 +4,6 @@
 @section('header-title', 'Ringkasan Aktivitas Sistem')
 
 @section('content')
-
-<!-- ============================================
-STATISTIK KARTU
-============================================ -->
 <div class="stats-grid">
 
     <!-- Total User -->

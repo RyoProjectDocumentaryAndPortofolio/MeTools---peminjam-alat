@@ -37,7 +37,9 @@
     font-size: 24px;
 }
 
-/* USER CARD */
+/* ============================================
+   USER CARD (INDEX)
+   ============================================ */
 .user-card {
     background: rgba(23, 19, 5, 0.7);
     border: 1px solid #4a4737;
@@ -85,6 +87,7 @@
 .search-form {
     display: flex;
     align-items: center;
+    gap: 6px;
 }
 
 .search-wrapper {
@@ -95,6 +98,7 @@
     border-radius: 6px;
     padding: 2px 4px;
     transition: border-color 0.3s ease;
+    flex: 1;
 }
 
 .search-wrapper:focus-within {
@@ -115,8 +119,9 @@
     padding: 8px 8px;
     font-size: 14px;
     font-family: 'Hanken Grotesk', sans-serif;
-    min-width: 180px;
+    min-width: 160px;
     outline: none;
+    flex: 1;
 }
 
 .search-input::placeholder {
@@ -151,7 +156,7 @@
     font-family: 'Hanken Grotesk', sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-left: 4px;
+    white-space: nowrap;
 }
 
 .search-btn:hover {
@@ -185,7 +190,9 @@
     box-shadow: 0 4px 16px rgba(216, 200, 96, 0.3);
 }
 
-/* TABLE */
+/* ============================================
+   TABLE
+   ============================================ */
 .table-wrapper {
     overflow-x: auto;
 }
@@ -234,7 +241,9 @@
     text-align: center;
 }
 
-/* ROLE BADGE */
+/* ============================================
+   ROLE BADGE
+   ============================================ */
 .role-badge {
     display: inline-block;
     padding: 3px 14px;
@@ -262,7 +271,9 @@
     border: 1px solid rgba(0, 200, 83, 0.3);
 }
 
-/* ACTION BUTTONS */
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
 .action-buttons {
     display: flex;
     align-items: center;
@@ -317,7 +328,9 @@
     transform: scale(1.1);
 }
 
-/* EMPTY */
+/* ============================================
+   EMPTY
+   ============================================ */
 .empty-cell {
     text-align: center;
     padding: 40px 20px;
@@ -388,6 +401,169 @@
 }
 
 /* ============================================
+   FORM CARD (CREATE & EDIT)
+   ============================================ */
+.form-card {
+    background: rgba(23, 19, 5, 0.7);
+    border: 1px solid #4a4737;
+    border-radius: 8px;
+    overflow: hidden;
+    backdrop-filter: blur(4px);
+    max-width: 640px;
+}
+
+.form-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #4a4737;
+}
+
+.form-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #ebe2c8;
+    margin: 0 0 4px 0;
+}
+
+.form-header h3 .material-symbols-outlined {
+    color: #d8c860;
+    font-size: 26px;
+}
+
+.form-subtitle {
+    font-size: 14px;
+    color: #96917e;
+    margin: 0;
+}
+
+.form-container {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ebe2c8;
+    margin-bottom: 6px;
+}
+
+.form-group label .material-symbols-outlined {
+    color: #d8c860;
+    font-size: 20px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(23, 19, 5, 0.6);
+    border: 1px solid #4a4737;
+    border-radius: 6px;
+    color: #ebe2c8;
+    font-size: 14px;
+    font-family: 'Hanken Grotesk', sans-serif;
+    transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #d8c860;
+    box-shadow: 0 0 12px rgba(216, 200, 96, 0.15);
+}
+
+.form-input::placeholder {
+    color: #4a4737;
+}
+
+.form-input option {
+    background: #171305;
+    color: #ebe2c8;
+}
+
+.form-input textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.form-error {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #ff8a80;
+}
+
+/* ============================================
+   FORM ACTIONS
+   ============================================ */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(74, 71, 55, 0.3);
+    margin-top: 8px;
+}
+
+.btn-cancel {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: transparent;
+    color: #96917e;
+    border: 1px solid #4a4737;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Hanken Grotesk', sans-serif;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.btn-cancel:hover {
+    border-color: #d8c860;
+    color: #d8c860;
+}
+
+.btn-submit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #f5e479 0%, #d8c860 50%, #b5a642 100%);
+    color: #171305;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Hanken Grotesk', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-submit .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.btn-submit:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 16px rgba(216, 200, 96, 0.3);
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 @media (max-width: 992px) {
@@ -413,6 +589,9 @@
         width: 100%;
         justify-content: center;
     }
+    .form-card {
+        max-width: 100%;
+    }
 }
 
 @media (max-width: 768px) {
@@ -435,6 +614,20 @@
         padding: 4px 10px;
         font-size: 12px;
     }
+    .form-container {
+        padding: 16px;
+    }
+    .form-header {
+        padding: 16px;
+    }
+    .form-actions {
+        flex-direction: column;
+    }
+    .btn-cancel,
+    .btn-submit {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 @media (max-width: 480px) {
@@ -453,123 +646,4 @@
     .search-input {
         font-size: 13px;
     }
-}
-/* ============================================
-   SEARCH FORM & BUTTON ADD
-   ============================================ */
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.search-form {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.search-wrapper {
-    display: flex;
-    align-items: center;
-    background: rgba(23, 19, 5, 0.6);
-    border: 1px solid #4a4737;
-    border-radius: 6px;
-    padding: 2px 4px;
-    transition: border-color 0.3s ease;
-    flex: 1;
-}
-
-.search-wrapper:focus-within {
-    border-color: #d8c860;
-    box-shadow: 0 0 12px rgba(216, 200, 96, 0.15);
-}
-
-.search-icon {
-    color: #4a4737;
-    font-size: 20px;
-    padding: 0 4px;
-}
-
-.search-input {
-    background: transparent;
-    border: none;
-    color: #ebe2c8;
-    padding: 8px 8px;
-    font-size: 14px;
-    font-family: 'Hanken Grotesk', sans-serif;
-    min-width: 160px;
-    outline: none;
-    flex: 1;
-}
-
-.search-input::placeholder {
-    color: #4a4737;
-}
-
-.search-btn {
-    padding: 6px 16px;
-    background: linear-gradient(135deg, #f5e479 0%, #d8c860 50%, #b5a642 100%);
-    color: #171305;
-    border: none;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: 'Hanken Grotesk', sans-serif;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.search-btn:hover {
-    transform: scale(1.03);
-    box-shadow: 0 4px 12px rgba(216, 200, 96, 0.3);
-}
-
-.search-reset {
-    display: flex;
-    align-items: center;
-    color: #4a4737;
-    text-decoration: none;
-    padding: 0 4px;
-    transition: color 0.3s ease;
-}
-
-.search-reset:hover {
-    color: #d8c860;
-}
-
-.search-reset .material-symbols-outlined {
-    font-size: 18px;
-}
-
-/* ============================================
-   TOMBOL TAMBAH USER
-   ============================================ */
-.btn-add {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 18px;
-    background: linear-gradient(135deg, #f5e479 0%, #d8c860 50%, #b5a642 100%);
-    color: #171305;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: 'Hanken Grotesk', sans-serif;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.btn-add .material-symbols-outlined {
-    font-size: 20px;
-}
-
-.btn-add:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 16px rgba(216, 200, 96, 0.3);
 }
