@@ -1,23 +1,30 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Alat;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\PeminjamController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\testController;
 
 // Route utama
 Route::get('/', function () {
-    return view('welcome');
-});
+    $alats = Alat::with('kategori')
+        ->where('stok', '>', 0)
+        ->where('status_kondisi', 'Baik')
+        ->latest()
+        ->take(10)
+        ->get();
+
+    return view('landing', compact('alats'));
+})->name('landing');
 
 // Route tamu (belum login)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
-// ============================================
-// ROUTE ADMIN
-// ============================================
+
 Route::middleware(['auth', 'role.admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
@@ -70,16 +77,16 @@ Route::middleware(['auth', 'role.petugas'])->prefix('petugas')->name('petugas.')
     // Peminjaman
     Route::get('/peminjaman', [PetugasController::class, 'indexPeminjaman'])->name('peminjaman.index');
     Route::post('/peminjaman/{id}/setujui', [PetugasController::class, 'setujuiPeminjaman'])->name('peminjaman.setujui');
+    Route::post('/peminjaman/{id}/tolak', [PetugasController::class, 'tolakPeminjaman'])->name('peminjaman.tolak');
     Route::post('/peminjaman/{id}/proses', [PetugasController::class, 'prosesPengembalian'])->name('peminjaman.proses');
 
     // Pengembalian
     Route::get('/pengembalian', [PetugasController::class, 'indexPengembalian'])->name('pengembalian.index');
     Route::post('/pengembalian/{id}', [PetugasController::class, 'prosesPengembalian'])->name('pengembalian.proses');
 
-    // ===== PERBAIKI INI =====
     Route::post('/verifikasi-kembali/{id}', [PetugasController::class, 'verifikasiPengembalian'])->name('verifikasi.kembali');
 
-    // Laporan PDF
+      Route::get('/laporan', [PetugasController::class, 'laporan'])->name('laporan.index');
     Route::get('/laporan/pdf', [PetugasController::class, 'generateLaporanPDF'])->name('laporan.pdf');
 });
 
@@ -97,3 +104,6 @@ Route::middleware(['auth', 'role.peminjam'])->prefix('peminjam')->name('peminjam
 // ROUTE LOGOUT
 // ============================================
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+//test
+Route::get('/test', [testController::class, 'test'])->name('test');

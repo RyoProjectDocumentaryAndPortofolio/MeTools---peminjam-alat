@@ -1,0 +1,329 @@
+/* ============================================
+   LAPORAN - STEAMPUNK STYLE
+   ============================================ */
+
+/* STATISTIK */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: rgba(23, 19, 5, 0.7);
+    border: 1px solid #4a4737;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    border-color: #d8c860;
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(216, 200, 96, 0.1);
+    color: #d8c860;
+    font-size: 24px;
+}
+
+.stat-info .stat-label {
+    font-size: 12px;
+    color: #96917e;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-info .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #ebe2c8;
+}
+
+/* FILTER */
+.filter-card {
+    background: rgba(23, 19, 5, 0.7);
+    border: 1px solid #4a4737;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    align-items: end;
+}
+
+.filter-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #96917e;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.filter-group .form-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(23, 19, 5, 0.6);
+    border: 1px solid #4a4737;
+    border-radius: 6px;
+    color: #ebe2c8;
+    font-size: 14px;
+    font-family: 'Hanken Grotesk', sans-serif;
+    transition: border-color 0.3s ease;
+}
+
+.filter-group .form-input:focus {
+    outline: none;
+    border-color: #d8c860;
+}
+
+.filter-group select option {
+    background: #171305;
+    color: #ebe2c8;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #f5e479, #d8c860);
+    color: #171305;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-filter:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 16px rgba(216, 200, 96, 0.3);
+}
+
+.btn-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: transparent;
+    color: #96917e;
+    border: 1px solid #4a4737;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-reset:hover {
+    border-color: #d8c860;
+    color: #d8c860;
+}
+
+.btn-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: #b53b2a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-pdf:hover {
+    background: #8a2a1a;
+    transform: scale(1.03);
+    box-shadow: 0 4px 16px rgba(181, 59, 42, 0.3);
+}
+
+/* LAPORAN CARD */
+.laporan-card {
+    background: rgba(23, 19, 5, 0.7);
+    border: 1px solid #4a4737;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.laporan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #4a4737;
+}
+
+.laporan-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #ebe2c8;
+}
+
+.laporan-header .total-data {
+    font-size: 13px;
+    color: #96917e;
+}
+
+/* TABLE */
+.laporan-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.laporan-table thead {
+    background: rgba(17, 14, 2, 0.6);
+}
+
+.laporan-table thead th {
+    padding: 10px 16px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #96917e;
+    border-bottom: 1px solid #4a4737;
+}
+
+.laporan-table tbody tr {
+    border-bottom: 1px solid rgba(74, 71, 55, 0.3);
+    transition: background 0.2s ease;
+}
+
+.laporan-table tbody tr:hover {
+    background: rgba(216, 200, 96, 0.05);
+}
+
+.laporan-table tbody td {
+    padding: 10px 16px;
+    color: #ccc6b2;
+    vertical-align: middle;
+}
+
+.alat-list {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 12px;
+    list-style: disc;
+}
+
+.alat-list li {
+    margin-bottom: 2px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.diajukan {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-badge.dipinjam {
+    background: rgba(79, 172, 254, 0.2);
+    color: #4facfe;
+    border: 1px solid rgba(79, 172, 254, 0.3);
+}
+
+.status-badge.menunggu_verifikasi {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.status-badge.dikembalikan {
+    background: rgba(0, 200, 83, 0.15);
+    color: #a5d6a7;
+    border: 1px solid rgba(0, 200, 83, 0.3);
+}
+
+.status-badge.telat {
+    background: rgba(255, 23, 68, 0.2);
+    color: #ff1744;
+    border: 1px solid rgba(255, 23, 68, 0.3);
+}
+
+.empty-cell {
+    text-align: center;
+    padding: 40px 20px;
+    color: #4a4737;
+    font-style: italic;
+}
+
+.pagination-wrapper {
+    padding: 12px 24px;
+    border-top: 1px solid #4a4737;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .filter-row {
+        grid-template-columns: 1fr;
+    }
+    .filter-actions {
+        flex-direction: column;
+    }
+    .btn-filter,
+    .btn-reset,
+    .btn-pdf {
+        width: 100%;
+        justify-content: center;
+    }
+    .laporan-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .laporan-table thead th,
+    .laporan-table tbody td {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+}

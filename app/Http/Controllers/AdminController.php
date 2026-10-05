@@ -27,9 +27,8 @@ class AdminController extends Controller
     }
 
     // ============================================
-    // CRUD ALAT (LENGKAP + SEARCH & PAGINATION)
+    // CRUD ALAT
     // ============================================
-
     public function indexAlat(Request $request)
     {
         $search = $request->input('search');
@@ -155,9 +154,8 @@ class AdminController extends Controller
     }
 
     // ============================================
-    // CRUD USER (LENGKAP + SEARCH & PAGINATION)
+    // CRUD USER
     // ============================================
-
     public function indexUser(Request $request)
     {
         $search = $request->input('search');
@@ -270,9 +268,8 @@ class AdminController extends Controller
     }
 
     // ============================================
-    // CRUD KATEGORI (LENGKAP + SEARCH & PAGINATION)
+    // CRUD KATEGORI
     // ============================================
-
     public function indexKategori(Request $request)
     {
         $search = $request->input('search');
@@ -364,9 +361,8 @@ class AdminController extends Controller
     }
 
     // ============================================
-    // CRUD PEMINJAMAN (LENGKAP)
+    // CRUD PEMINJAMAN
     // ============================================
-
     public function indexPeminjaman(Request $request)
     {
         $search = $request->input('search');
@@ -559,33 +555,18 @@ class AdminController extends Controller
                 ->lockForUpdate()
                 ->findOrFail($request->peminjaman_id);
 
-            // HAPUS PENGECEKAN INI!
-            // if ($peminjaman->status !== 'dipinjam') {
-            //     throw new \Exception("Peminjaman ini tidak sedang dipinjam.");
-            // }
-
             // Hitung denda keterlambatan
             $tglKembaliPlan = Carbon::parse($peminjaman->tgl_kembali_plan)->startOfDay();
             $tglKembali = Carbon::now()->startOfDay();
 
             $dendaTerlambat = 0;
             if ($tglKembali->gt($tglKembaliPlan)) {
-                $selisihHari = $tglKembali->diffInDays($tglKembaliPlan);
+                $selisihHari = $tglKembaliPlan->diffInDays($tglKembali);
                 $dendaTerlambat = $selisihHari * self::DENDA_PER_HARI;
             }
 
             $dendaKerusakan = $request->denda_kerusakan ?? 0;
             $totalDenda = $dendaTerlambat + $dendaKerusakan;
-
-            // Update status peminjaman (kalau perlu)
-            // $statusBaru = $tglKembali->gt($tglKembaliPlan) ? 'telat' : 'dikembalikan';
-            // $peminjaman->update(['status' => $statusBaru]);
-
-            // Kembalikan stok alat (kalau perlu)
-            // foreach ($peminjaman->detailPinjam as $detail) {
-            //     $alat = Alat::lockForUpdate()->find($detail->alat_id);
-            //     $alat->increment('stok', $detail->jumlah);
-            // }
 
             // Simpan pengembalian
             Pengembalian::create([
@@ -609,7 +590,7 @@ class AdminController extends Controller
             DB::commit();
 
             return redirect()->route('admin.pengembalian.index')
-                ->with('success', 'Pengembalian berhasil diproses.');
+                ->with('success', 'Pengembalian berhasil diproses. Total denda: Rp ' . number_format($totalDenda, 0, ',', '.'));
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -637,7 +618,6 @@ class AdminController extends Controller
                 ->lockForUpdate()
                 ->findOrFail($pengembalian->peminjaman_id);
 
-            // Kembalikan status ke 'dipinjam'
             $peminjaman->update(['status' => 'dipinjam']);
 
             foreach ($peminjaman->detailPinjam as $detail) {

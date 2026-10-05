@@ -152,7 +152,7 @@
     </div>
     <div class="info">
         <div class="left">
-            <span>Total Transaksi:</span> {{ $totalTransaksi }}
+            <span>Total Transaksi:</span> {{ $total }}
         </div>
         <div class="right">
             <span>Total Denda:</span> <span class="total-denda">Rp {{ number_format($totalDenda, 0, ',', '.') }}</span>

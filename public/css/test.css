@@ -1,0 +1,22 @@
+.style1 {
+    color :rgb(223, 93, 6);
+    font-family: 'Courier New', Courier, monospace;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #8d9613;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}

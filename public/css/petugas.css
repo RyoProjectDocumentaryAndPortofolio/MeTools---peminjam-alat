@@ -1016,3 +1016,332 @@
         padding: 2px 10px;
     }
 }
+/* ============================================
+   FILTER BAR
+   ============================================ */
+.filter-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid #4a4737;
+    flex-wrap: wrap;
+    background: rgba(17, 14, 2, 0.4);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-group label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #96917e;
+}
+
+.filter-group label .material-symbols-outlined {
+    font-size: 16px;
+    color: #d8c860;
+}
+
+.filter-select {
+    padding: 8px 14px;
+    background: rgba(23, 19, 5, 0.6);
+    border: 1px solid #4a4737;
+    border-radius: 6px;
+    color: #ebe2c8;
+    font-size: 14px;
+    font-family: 'Hanken Grotesk', sans-serif;
+    min-width: 200px;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #d8c860;
+    box-shadow: 0 0 12px rgba(216, 200, 96, 0.15);
+}
+
+.filter-select option {
+    background: #171305;
+    color: #ebe2c8;
+}
+
+.btn-reset-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: transparent;
+    color: #96917e;
+    border: 1px solid #4a4737;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-reset-filter:hover {
+    border-color: #d8c860;
+    color: #d8c860;
+}
+
+.btn-reset-filter .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* ============================================
+   ALASAN TOLAK (di tabel)
+   ============================================ */
+.alasan-tolak {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #ff8a80;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.alasan-tolak .material-symbols-outlined {
+    font-size: 14px;
+}
+
+/* ============================================
+   BUTTON REJECT
+   ============================================ */
+.btn-reject {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    background: rgba(255, 23, 68, 0.15);
+    color: #ff8a80;
+    border: 1px solid rgba(255, 23, 68, 0.4);
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Hanken Grotesk', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-reject .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.btn-reject:hover {
+    background: #ff1744;
+    color: #171305;
+}
+
+/* ============================================
+   STATUS BADGE - DITOLAK
+   ============================================ */
+.status-badge.ditolak {
+    background: rgba(255, 23, 68, 0.15);
+    color: #ff8a80;
+    border: 1px solid rgba(255, 23, 68, 0.3);
+}
+
+.status-badge.menunggu_verifikasi {
+    background: rgba(156, 39, 176, 0.15);
+    color: #ce93d8;
+    border: 1px solid rgba(156, 39, 176, 0.3);
+}
+
+/* ============================================
+   MODAL
+   ============================================ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-box {
+    background: #171305;
+    background-image: radial-gradient(circle at 50% 0%, #2e2a18 0%, #171305 100%);
+    border: 2px solid #4a4737;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #4a4737;
+}
+
+.modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: #ebe2c8;
+    margin: 0;
+}
+
+.modal-header h3 .material-symbols-outlined {
+    color: #ff8a80;
+    font-size: 24px;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: #96917e;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    color: #ff8a80;
+    background: rgba(255, 23, 68, 0.1);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-desc {
+    font-size: 14px;
+    color: #ccc6b2;
+    margin-bottom: 16px;
+}
+
+.modal-desc strong {
+    color: #d8c860;
+}
+
+.modal-body label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ebe2c8;
+    margin-bottom: 6px;
+}
+
+.modal-body .required {
+    color: #ff8a80;
+}
+
+.modal-body textarea {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(23, 19, 5, 0.6);
+    border: 1px solid #4a4737;
+    border-radius: 6px;
+    color: #ebe2c8;
+    font-size: 14px;
+    font-family: 'Hanken Grotesk', sans-serif;
+    resize: vertical;
+    min-height: 90px;
+    transition: border-color 0.3s ease;
+}
+
+.modal-body textarea:focus {
+    outline: none;
+    border-color: #ff8a80;
+    box-shadow: 0 0 12px rgba(255, 23, 68, 0.15);
+}
+
+.form-hint {
+    display: block;
+    font-size: 11px;
+    color: #4a4737;
+    margin-top: 4px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-cancel {
+    padding: 8px 18px;
+    background: transparent;
+    color: #96917e;
+    border: 1px solid #4a4737;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    border-color: #d8c860;
+    color: #d8c860;
+}
+
+.btn-reject-confirm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #ff5252 0%, #ff1744 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-reject-confirm:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 16px rgba(255, 23, 68, 0.4);
+}
+
+.btn-reject-confirm .material-symbols-outlined {
+    font-size: 18px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-select {
+        width: 100%;
+    }
+    .btn-reset-filter {
+        justify-content: center;
+    }
+    .modal-actions {
+        flex-direction: column;
+    }
+    .btn-cancel,
+    .btn-reject-confirm {
+        width: 100%;
+        justify-content: center;
+    }
+}

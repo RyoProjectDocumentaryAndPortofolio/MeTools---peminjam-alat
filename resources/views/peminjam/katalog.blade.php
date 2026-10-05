@@ -45,44 +45,53 @@
             @enderror
         </div>
 
-        <!-- Tabel Alat -->
-        <div class="table-wrapper">
-            <table class="katalog-table">
-                <thead>
-                    <tr>
-                        <th width="50">Pilih</th>
-                        <th>Nama Alat</th>
-                        <th>Kategori</th>
-                        <th>Stok</th>
-                        <th>Kondisi</th>
-                        <th width="120">Jumlah</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($alats as $alat)
-                        <tr>
-                            <td class="text-center">
-                                <input type="checkbox" name="alat_id[]" value="{{ $alat->id }}" class="alat-checkbox" data-stok="{{ $alat->stok }}">
-                            </td>
-                            <td class="alat-name">{{ $alat->nama_alat }}</td>
-                            <td>{{ $alat->kategori->nama_kategori ?? '-' }}</td>
-                            <td>{{ $alat->stok }}</td>
-                            <td>
-                                <span class="kondisi-badge {{ $alat->status_kondisi == 'Baik' ? 'baik' : 'rusak' }}">
-                                    {{ $alat->status_kondisi }}
-                                </span>
-                            </td>
-                            <td>
-                                <input type="number" name="jumlah[]" class="form-input jumlah-input" min="1" max="{{ $alat->stok }}" value="1" disabled>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="empty-cell">Belum ada alat yang tersedia.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <!-- GRID CARD ALAT -->
+        <div class="alat-grid">
+            @forelse($alats as $alat)
+                <div class="alat-card" data-stok="{{ $alat->stok }}">
+                    <!-- Checkbox -->
+                    <label class="alat-checkbox-wrapper">
+                        <input type="checkbox" name="alat_id[]" value="{{ $alat->id }}" class="alat-checkbox" data-stok="{{ $alat->stok }}">
+                        <span class="checkmark"></span>
+                    </label>
+
+                    <!-- Gambar -->
+                    <div class="alat-image">
+                        @if($alat->gambar)
+                            <img src="{{ asset($alat->gambar) }}" alt="{{ $alat->nama_alat }}">
+                        @else
+                            <div class="no-image">
+                                <span class="material-symbols-outlined">inventory_2</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Info -->
+                    <div class="alat-info">
+                        <span class="alat-kategori">{{ $alat->kategori->nama_kategori ?? '-' }}</span>
+                        <h4 class="alat-nama">{{ $alat->nama_alat }}</h4>
+                        <p class="alat-deskripsi">{{ Str::limit($alat->deskripsi ?? 'Tidak ada deskripsi', 60) }}</p>
+
+                        <div class="alat-meta">
+                            <span class="alat-stok">
+                                <span class="material-symbols-outlined">inventory</span>
+                                Stok: {{ $alat->stok }}
+                            </span>
+                            <span class="kondisi-badge {{ $alat->status_kondisi == 'Baik' ? 'baik' : 'rusak' }}">
+                                {{ $alat->status_kondisi }}
+                            </span>
+                        </div>
+
+                        <!-- Jumlah -->
+                        <div class="alat-jumlah">
+                            <label>Jumlah:</label>
+                            <input type="number" name="jumlah[]" class="form-input jumlah-input" min="1" max="{{ $alat->stok }}" value="1" disabled>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="empty-cell" style="grid-column: 1 / -1;">Belum ada alat yang tersedia.</div>
+            @endforelse
         </div>
 
         <!-- Submit -->
@@ -106,12 +115,14 @@
     // Enable jumlah input when checkbox checked
     document.querySelectorAll('.alat-checkbox').forEach(function(checkbox) {
         checkbox.addEventListener('change', function() {
-            var row = this.closest('tr');
-            var jumlahInput = row.querySelector('.jumlah-input');
+            var card = this.closest('.alat-card');
+            var jumlahInput = card.querySelector('.jumlah-input');
             if (this.checked) {
+                card.classList.add('selected');
                 jumlahInput.disabled = false;
                 jumlahInput.value = 1;
             } else {
+                card.classList.remove('selected');
                 jumlahInput.disabled = true;
                 jumlahInput.value = 0;
             }

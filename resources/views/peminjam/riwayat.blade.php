@@ -49,7 +49,7 @@
                         <td>{{ \Carbon\Carbon::parse($item->tgl_kembali_plan)->format('d-m-Y') }}</td>
                         <td>
                             <span class="status-badge {{ $item->status }}">
-                                {{ ucfirst($item->status) }}
+                                {{ ucfirst(str_replace('_', ' ', $item->status)) }}
                             </span>
                         </td>
                         <td>
@@ -85,11 +85,37 @@
                                 <span class="badge-waiting">⏳ Menunggu Verifikasi</span>
                             @elseif($item->status == 'diajukan')
                                 <span class="badge-diajukan">📋 Diajukan</span>
+                            @elseif($item->status == 'ditolak')
+                                <span class="badge-ditolak">❌ Ditolak</span>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
                     </tr>
+
+                    {{-- Baris khusus menampilkan alasan penolakan --}}
+                    @if($item->status === 'ditolak' && $item->alasan_penolakan)
+                        <tr class="row-alasan-tolak">
+                            <td colspan="7">
+                                <div class="alasan-tolak-card">
+                                    <div class="alasan-header">
+                                        <span class="material-symbols-outlined">cancel</span>
+                                        <strong>Pengajuan Ditolak</strong>
+                                    </div>
+                                    <p class="alasan-text">{{ $item->alasan_penolakan }}</p>
+                                    <div class="alasan-meta">
+                                        <small>
+                                            Ditolak oleh: {{ $item->ditolakOleh->name ?? '-' }}
+                                            @if($item->ditolak_pada)
+                                                — {{ \Carbon\Carbon::parse($item->ditolak_pada)->format('d-m-Y H:i') }}
+                                            @endif
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endif
+
                 @empty
                     <tr>
                         <td colspan="7" class="empty-cell">Belum ada riwayat peminjaman.</td>

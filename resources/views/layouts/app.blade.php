@@ -82,12 +82,11 @@
                             <span class="material-symbols-outlined">swap_horiz</span>
                             Pemantauan Pengembalian
                         </a>
-                        <div class="header-actions">
-                            <a href="{{ route('petugas.laporan.pdf') }}" class="btn-pdf" target="_blank">
-                                <span class="material-symbols-outlined">picture_as_pdf</span>
-                                Cetak Laporan PDF
-                            </a>
-                        </div>
+                        <!-- Menu Laporan -->
+                        <a href="{{ route('petugas.laporan.index') }}" class="nav-link {{ request()->routeIs('petugas.laporan.*') ? 'active' : '' }}">
+                            <span class="material-symbols-outlined">receipt_long</span>
+                            Laporan
+                        </a>
                     @endif
 
                     <!-- ============================================
